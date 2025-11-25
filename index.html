@@ -286,21 +286,21 @@
         
         <div class="char-carousel">
             <div class="char-card" onclick="startGame('fire_intro')">
-                <img src="images/fire1.jpg" alt="林火">
+                <img src="fire1.jpg" alt="林火">
                 <div class="char-info">
                     <span class="char-name">林火</span>
                     <span class="char-role">「愛的意思就是，我可以任意傷害你。」</span>
                 </div>
             </div>
             <div class="char-card" onclick="startGame('hui_intro')">
-                <img src="images/fire2.jpg" alt="灰灰">
+                <img src="fire2.jpg" alt="灰灰">
                 <div class="char-info">
                     <span class="char-name">灰灰</span>
                     <span class="char-role">「我已被吃掉，整個人一點也不剩。」</span>
                 </div>
             </div>
             <div class="char-card" onclick="startGame('ether_intro')">
-                <img src="images/fire3.jpg" alt="以太">
+                <img src="fire3.jpg" alt="以太">
                 <div class="char-info">
                     <span class="char-name">以太</span>
                     <span class="char-role">「我的肚腹，必須寸草不生。」</span>
@@ -341,15 +341,15 @@
                 { text: "重新開始", target: "start" }
             ]
         },
-        // ★ 結局
+        // ★ 結局 - 修改點 4
         fire_end_success: {
-            image: "images/fire1.jpg", 
+            image: "fire1.jpg", 
             text: "河明消失了，像空氣一樣淡。灰灰變胖了，然後被你拋棄。\n\n你坐在空蕩蕩的田野上，雖然孤獨，但你感到神聖。\n沒有任何關係是完全平等的，你是贏家。\n\n<span class='highlight-gold'>結局：荒原上的上帝</span>",
             choices: [{ text: "重新開始", target: "start" }]
         },
-        // ★ 結局
+        // ★ 結局 - 修改點 5
         fire_end_fail: {
-            image: "images/fire1.jpg",
+            image: "fire1.jpg",
             text: "那一瞬間的猶豫，讓你從神壇跌落。\n\n你意識到自己只是一個飢餓的普通男人。野草瘋長，將你淹沒。\n\n<span class='highlight-red'>結局：凡人的飢餓</span>",
             choices: [{ text: "重新開始", target: "start" }]
         },
@@ -370,17 +370,17 @@
             ]
         },
         hui_escape: {
-            image: "images/fire2.jpg",
+            image: "fire2.jpg", // 修改點 6
             text: "你離開了那個房間。你拿出餐單，然後把它揉爛。\n\n你開始渴望脂肪。你的身體開始膨脹，像一層盔甲。身旁的座位是空的，沒人能擠壓你。\n\n<span class='highlight-gold'>結局：脂肪堡壘</span>",
             choices: [{ text: "重新開始", target: "start" }]
         },
         hui_hide: {
-            image: "images/fire2.jpg",
+            image: "fire2.jpg", // 修改點 7
             text: "你拒絕張開嘴。林火的表情變了。\n\n那團灰霧開始令人窒息。你試圖躲進影子，但影子也是他的。你發現自己無處可逃。\n\n<span class='highlight-red'>結局：被霧吞噬</span>",
             choices: [{ text: "重新開始", target: "start" }]
         },
         hui_bad_end: {
-            image: "images/fire2.jpg",
+            image: "fire2.jpg", // 修改點 8
             text: "你變得越來越瘦，越來越聽話。\n\n你只是一具被他擺弄的人偶。有一天，他厭倦了，把你扔在角落。\n\n<span class='highlight-red'>結局：人皮刺繡</span>",
             choices: [{ text: "重新開始", target: "start" }]
         },
@@ -394,7 +394,7 @@
             ]
         },
         ether_pain: {
-            image: "images/fire3.jpg",
+            image: "fire3.jpg", // 修改點 9
             text: "他給你劇痛。你慘叫，但內心卻平靜了。\n\n「愛的意思就是，我可以任意傷害你。」他說。\n\n你在毀滅中確認存在。\n\n<span class='highlight-red'>結局：痛覺成癮者</span>",
             choices: [{ text: "重新開始", target: "start" }]
         },
@@ -406,12 +406,12 @@
             ]
         },
         ether_hollow_end: {
-            image: "images/fire3.jpg",
+            image: "fire3.jpg", // 修改點 10
             text: "你穿著白色的禮服，扮演著幸福的角色。\n\n木抱著的不是你，是那個角色。你在安全的房子裡，慢慢變成了一個幽靈。\n\n<span class='highlight-gold'>結局：衣櫃裡的幽靈</span>",
             choices: [{ text: "重新開始", target: "start" }]
         },
         ether_regret: {
-            image: "images/fire3.jpg",
+            image: "fire3.jpg", // 修改點 11
             text: "在深夜，你敲著實心的牆壁，聽不到回音。\n\n你想起了火的暴虐。你打開窗戶，看著下方。或許墜落的痛楚能讓你醒過來？\n\n<span class='highlight-red'>結局：未完成的墜落</span>",
             choices: [{ text: "重新開始", target: "start" }]
         }
