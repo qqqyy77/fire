@@ -10,13 +10,13 @@
             --accent-red: #a80000;
             --accent-gold: #c5a000;
             --text-color: #e0e0e0;
-            /* 文字區背景漸層：上方透明，下方深黑，確保閱讀性 */
-            --overlay-bg: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.9) 30%, rgba(0,0,0,1) 100%);
+            /* 讓文字背景稍微深一點，確保閱讀清晰 */
+            --overlay-bg: rgba(10, 10, 10, 0.92);
         }
 
         * {
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent; /* 移除手機點擊時的藍色高光 */
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -27,20 +27,18 @@
             color: var(--text-color);
             height: 100vh;
             width: 100vw;
-            overflow: hidden; /* 防止整個頁面彈動，滾動交給內部容器 */
-            position: fixed; /* 固定頁面，避免 iOS safari 網址列干擾 */
+            overflow: hidden; /* 鎖定 body，滾動交給內部容器 */
+            position: fixed; /* 防止 iOS 橡皮筋效果 */
         }
 
-        /* 遊戲主容器 */
         #game-view {
             width: 100%;
             height: 100%;
             position: relative;
             background: #111;
-            overflow: hidden;
         }
 
-        /* --- 背景圖片層 (固定不動) --- */
+        /* --- 背景圖片層 (靜態) --- */
         #bg-layer {
             position: absolute;
             top: 0;
@@ -53,16 +51,16 @@
         .bg-img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: cover; /* 背景圖依然填滿，保持氛圍 */
             object-position: center;
-            filter: brightness(0.7); /* 稍微壓暗 */
+            filter: brightness(0.5); /* 壓暗背景，讓前方文字清楚 */
             position: absolute;
             top: 0;
             left: 0;
             transition: opacity 0.5s ease;
         }
 
-        /* --- UI層：包含文字與選項 --- */
+        /* --- UI層：包含可滾動的文字區 --- */
         #ui-layer {
             position: absolute;
             top: 0;
@@ -70,65 +68,63 @@
             width: 100%;
             height: 100%;
             z-index: 10;
-            /* 使用 flex 佈局讓文字區靠下 */
             display: flex;
             flex-direction: column;
-            justify-content: flex-end; 
-            pointer-events: none; /* 讓點擊穿透到背景(如果有需要交互) */
+            justify-content: flex-end; /* 讓內容靠底部對齊 */
+            pointer-events: none; /* 讓點擊穿透到背景，除了文字區 */
         }
 
-        /* ★ 修復滑動關鍵：可滾動的文字遮罩區域 */
-        .text-overlay-scroll-container {
-            pointer-events: auto; /* 恢復點擊與滾動交互 */
+        /* ★ 關鍵修復：滾動容器 */
+        .text-scroll-box {
+            pointer-events: auto; /* 恢復交互 */
             width: 100%;
-            /* 限制最大高度為螢幕的 70%，超過則出現滾動條 */
-            max-height: 70vh; 
-            overflow-y: auto; /* 允許垂直滾動 */
-            -webkit-overflow-scrolling: touch; /* iOS 平滑滾動支援 */
+            /* 限制高度：留出上方 30% 給背景圖，下方 70% 給文字 */
+            max-height: 75vh; 
             background: var(--overlay-bg);
-            /* 上方加入 padding 讓漸層自然過渡 */
-            padding: 60px 25px 40px 25px;
-            /* 底部圓角，視覺上比較柔和 */
             border-top-left-radius: 20px;
             border-top-right-radius: 20px;
-            animation: slideUp 0.5s ease-out;
+            
+            /* ★ 關鍵：內滾動設定 */
+            overflow-y: auto; 
+            -webkit-overflow-scrolling: touch;
+            
+            /* ★ 關鍵：增加底部留白，防止選項被手機導航列擋住 */
+            padding: 40px 30px 120px 30px; 
+            
+            animation: slideUp 0.4s ease-out;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.8);
         }
 
-        /* 劇情文字 */
         .story-text {
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             line-height: 1.8;
-            text-shadow: 0 2px 4px rgba(0,0,0,1);
-            margin-bottom: 25px;
+            color: #fff;
+            margin-bottom: 30px;
             white-space: pre-wrap;
-            /* 增加底部 padding 以防文字被按鈕擋住 */
-            padding-bottom: 10px;
         }
 
-        /* 選項按鈕容器 */
         .choices-box {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            padding-bottom: 20px; /* 確保最後一個按鈕不會貼底 */
+            gap: 15px;
+            width: 100%;
         }
 
-        /* 選項按鈕 */
         button {
-            background: rgba(50, 50, 50, 0.6);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             color: #fff;
-            padding: 18px;
+            padding: 20px;
             font-size: 1rem;
             font-family: var(--font-main);
             text-align: left;
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s;
-            text-shadow: 0 1px 2px black;
-            /* 防止按鈕文字被選取 */
-            user-select: none; 
+            /* 確保按鈕夠大，好點擊 */
+            min-height: 60px; 
+            display: flex;
+            align-items: center;
         }
 
         button:active {
@@ -137,7 +133,7 @@
             transform: scale(0.98);
         }
 
-        /* --- ★ 全新設計：開始畫面 (左右滑動輪播) --- */
+        /* --- 開始畫面 (左右滑動輪播) --- */
         #start-screen {
             position: absolute;
             top: 0;
@@ -145,85 +141,80 @@
             width: 100%;
             height: 100%;
             z-index: 20;
-            background: #0a0a0a; /* 深色背景 */
+            background: #050505;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            padding-bottom: 40px;
+            justify-content: center; /* 垂直居中 */
         }
 
         .start-header {
             text-align: center;
-            margin-bottom: 20px;
-            z-index: 30;
-            text-shadow: 0 2px 10px rgba(0,0,0,1);
+            margin-bottom: 10px;
+            height: 10vh; /* 標題佔據上方空間 */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .start-header h1 {
             font-weight: normal;
             letter-spacing: 0.3em;
-            margin: 0 0 10px 0;
-            font-size: 1.8rem;
-            color: #fff;
-        }
-
-        .start-header p {
-            font-size: 0.9rem;
-            color: #888;
             margin: 0;
-            letter-spacing: 0.1em;
+            font-size: 1.5rem;
+            color: #fff;
         }
 
         .swipe-hint {
             font-size: 0.8rem;
-            color: var(--accent-gold);
-            margin-top: 10px;
-            opacity: 0.8;
-            animation: pulse 2s infinite;
+            color: #666;
+            margin-top: 5px;
         }
 
-        /* 角色卡片輪播容器 */
+        /* 卡片輪播容器 */
         .char-carousel {
             display: flex;
-            flex-direction: row; /* 橫向排列 */
-            overflow-x: auto; /* 允許橫向滾動 */
-            /* 關鍵：啟用滾動捕捉，讓卡片滑動時會自動對齊 */
-            scroll-snap-type: x mandatory; 
+            flex-direction: row;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory; /* 滾動自動對齊 */
             -webkit-overflow-scrolling: touch;
             gap: 20px;
-            padding: 0 25px; /* 兩側留白 */
-            height: 65vh; /* 卡片區域高度 */
-            align-items: center; /* 垂直居中 */
-            /* 隱藏滾動條 (Chrome/Safari) */
+            padding: 0 40px; /* 兩側留白，讓第一張和最後一張能置中 */
+            
+            /* ★ 關鍵：固定高度區域，讓卡片可以撐滿 */
+            height: 70vh; 
+            align-items: center;
+            
+            /* 隱藏滾動條 */
             scrollbar-width: none; 
         }
         .char-carousel::-webkit-scrollbar { display: none; }
 
-        /* 角色卡片 */
+        /* ★ 關鍵修復：卡片樣式 */
         .char-card {
-            position: relative;
-            /* 卡片寬度佔螢幕 80%，讓使用者能看到前後有其他卡片 */
-            min-width: 80vw; 
-            height: 100%;
-            border-radius: 16px;
+            /* 強制高度 */
+            height: 100%; 
+            /* ★ 核心：強制 9:16 比例，寬度會自動計算 */
+            aspect-ratio: 9/16; 
+            
+            flex-shrink: 0; /* 禁止被擠壓 */
+            border-radius: 12px;
             overflow: hidden;
-            /* 關鍵：設定捕捉點為卡片中心 */
-            scroll-snap-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            position: relative;
+            scroll-snap-align: center; /* 對齊螢幕中央 */
             border: 1px solid #333;
-            transition: transform 0.3s ease;
-            flex-shrink: 0; /* 防止卡片被壓縮 */
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            background: #000;
         }
 
         .char-card img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            /* ★ 核心：確保圖片填滿卡片且不變形（因為卡片已經是 9:16，所以這裡用 cover 也不會裁切） */
+            object-fit: cover; 
             filter: grayscale(100%) brightness(0.6);
-            transition: all 0.5s ease;
+            transition: filter 0.3s;
         }
-        
-        /* 選中態（手機上 active 效果較好）*/
+
         .char-card:active img {
             filter: grayscale(0%) brightness(1);
         }
@@ -236,13 +227,14 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            padding: 30px 20px;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: 20px 10px;
+            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
             text-align: center;
+            pointer-events: none;
         }
 
         .char-name {
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             font-weight: bold;
             color: #fff;
             display: block;
@@ -250,16 +242,14 @@
         }
         
         .char-role {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: var(--accent-gold);
-            letter-spacing: 0.1em;
         }
 
         /* --- 輔助樣式 --- */
         .hidden { display: none !important; }
         
-        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+        @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
         .highlight-gold { color: var(--accent-gold); font-weight: bold;}
         .highlight-red { color: var(--accent-red); font-weight: bold;}
@@ -269,7 +259,6 @@
         @keyframes shake {
             0% { transform: translateX(0); } 25% { transform: translateX(-5px) rotate(-1deg); } 75% { transform: translateX(5px) rotate(1deg); } 100% { transform: translateX(0); }
         }
-
     </style>
 </head>
 <body>
@@ -281,7 +270,7 @@
     </div>
 
     <div id="ui-layer" class="hidden">
-        <div class="text-overlay-scroll-container">
+        <div class="text-scroll-box">
             <div id="story-text" class="story-text"></div>
             <div id="choices-box" class="choices-box"></div>
         </div>
@@ -290,7 +279,6 @@
     <div id="start-screen">
         <div class="start-header">
             <h1>人皮刺繡</h1>
-            <p>點擊卡片進入皮膚</p>
             <div class="swipe-hint">← 左右滑動選擇 →</div>
         </div>
         
@@ -322,7 +310,6 @@
 </div>
 
 <script>
-    // 遊戲數據 (保持不變)
     const gameData = {
         // --- 林火路線 ---
         fire_intro: {
@@ -441,7 +428,7 @@
     const choicesBoxEl = document.getElementById('choices-box');
     const bgImgEl = document.getElementById('current-bg');
     const gameView = document.getElementById('game-view');
-    const textScrollContainer = document.querySelector('.text-overlay-scroll-container');
+    const textScrollBox = document.querySelector('.text-scroll-box');
 
     // 開始遊戲
     function startGame(startSceneKey) {
@@ -456,7 +443,6 @@
     // 渲染場景
     function renderScene(sceneKey) {
         if (sceneKey === 'start') {
-            // 返回開始畫面
             uiLayer.classList.add('hidden');
             startScreen.classList.remove('hidden');
             return;
@@ -466,18 +452,18 @@
 
         // 1. 切換圖片
         if (scene.image && bgImgEl.src !== scene.image) {
-            bgImgEl.style.opacity = 0; // 先淡出
+            bgImgEl.style.opacity = 0; 
             setTimeout(() => {
                 bgImgEl.src = scene.image;
-                bgImgEl.style.opacity = 1; // 再淡入
-            }, 300);
+                bgImgEl.style.opacity = 1; 
+            }, 200);
         }
 
         // 2. 更新文字
         storyTextEl.innerHTML = scene.text;
         
-        // ★ 關鍵：每次切換場景時，將文字滾動條重置到最上方
-        textScrollContainer.scrollTop = 0;
+        // ★ 關鍵：每次切換場景時，文字區滾動回頂部
+        textScrollBox.scrollTop = 0;
 
         // 3. 生成選項
         choicesBoxEl.innerHTML = '';
@@ -486,7 +472,7 @@
                 const btn = document.createElement('button');
                 btn.textContent = choice.text;
                 btn.onclick = () => {
-                    // 點擊回饋：如果是暴力/特殊選項，畫面震動
+                    // 震動回饋
                     if (sceneKey === 'fire_sickle' || sceneKey === 'ether_intro') {
                         gameView.classList.add('shake');
                         setTimeout(() => gameView.classList.remove('shake'), 500);
