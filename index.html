@@ -10,9 +10,9 @@
             --accent-red: #a80000;
             --accent-gold: #c5a000;
             --text-color: #e0e0e0;
-            /* 毛玻璃背景色 (更深一點) */
-            --glass-bg: rgba(15, 15, 15, 0.75);
-            --glass-border: rgba(255, 255, 255, 0.08);
+            /* 毛玻璃背景色 (更深一點，增加對比) */
+            --glass-bg: rgba(10, 10, 10, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.05);
         }
 
         * {
@@ -40,25 +40,55 @@
             background: #020202;
         }
 
-        /* --- 動態背景與噪點特效 --- */
+        /* --- 環境特效層 --- */
+        
+        /* 1. 動態流動背景 (基底) */
         .animated-bg {
             position: absolute;
             top: -50%; left: -50%; width: 200%; height: 200%;
-            background: linear-gradient(-45deg, #000000, #111111, #050505, #0a0000);
+            background: linear-gradient(-45deg, #000000, #1a1a1a, #080808, #120000);
             background-size: 300% 300%;
-            animation: gradientBG 20s ease infinite;
+            animation: gradientBG 25s ease infinite;
             z-index: 0;
+            opacity: 0.6;
         }
         @keyframes gradientBG {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
+
+        /* 2. ★ 增強特效：動態雜訊顆粒 (Noise Grain) */
         .noise-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 1; opacity: 0.08; pointer-events: none;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+            position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            z-index: 1; 
+            opacity: 0.15; /* 提高不透明度讓雜訊更明顯 */
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+            /* 讓雜訊快速跳動，產生底片顆粒感 */
+            animation: noiseAnim 0.2s infinite steps(10);
         }
+        @keyframes noiseAnim {
+            0% { transform: translate(0,0); }
+            10% { transform: translate(-5%,-5%); }
+            20% { transform: translate(-10%,5%); }
+            30% { transform: translate(5%,-10%); }
+            40% { transform: translate(-5%,15%); }
+            50% { transform: translate(-10%,5%); }
+            60% { transform: translate(15%,0); }
+            70% { transform: translate(0,10%); }
+            80% { transform: translate(-15%,0); }
+            90% { transform: translate(10%,5%); }
+        }
+
+        /* 3. ★ 新增特效：暗角 (Vignette) - 壓抑氛圍 */
+        .vignette-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2; pointer-events: none;
+            /* 四周暗，中間亮 */
+            background: radial-gradient(circle at center, transparent 30%, rgba(0,0,0,0.8) 100%);
+        }
+
 
         /* --- UI層 --- */
         #ui-layer {
@@ -71,35 +101,32 @@
         .text-scroll-box {
             pointer-events: auto; width: 100%; height: 95vh;
             background: var(--glass-bg);
-            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
             border-top: 1px solid var(--glass-border);
             border-top-left-radius: 24px; border-top-right-radius: 24px;
             overflow-y: auto; -webkit-overflow-scrolling: touch;
             padding: 40px 30px 100px 30px;
-            box-shadow: 0 -15px 50px rgba(0,0,0,0.9);
+            box-shadow: 0 -15px 50px rgba(0,0,0,1);
             scrollbar-width: none;
         }
         .text-scroll-box::-webkit-scrollbar { display: none; }
 
-        /* --- ★ 特效：文字內容容器 --- */
+        /* --- ★ 修改特效：文字平滑進場 (取代閃爍) --- */
         #scene-content {
-            opacity: 0; /* 預設隱藏，等 JS 觸發動畫 */
+            opacity: 0; 
         }
-        /* 文字顯示時的動畫：帶有輕微的故障感和閃爍 */
+        /* 新的動畫：緩慢上浮並從模糊變清晰 */
         .animate-text-in {
-            animation: flickerFadeIn 0.8s ease-out forwards;
+            animation: smoothFadeUp 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
-        @keyframes flickerFadeIn {
-            0% { opacity: 0; transform: translateY(15px) skewX(2deg); filter: blur(5px); }
-            20% { opacity: 0.4; transform: translateY(5px) skewX(-1deg); filter: blur(2px); }
-            40% { opacity: 0.2; transform: translateY(8px) skewX(1deg); }
-            60% { opacity: 0.8; transform: translateY(2px) skewX(0deg); filter: blur(0px); }
-            100% { opacity: 1; transform: translateY(0); }
+        @keyframes smoothFadeUp {
+            0% { opacity: 0; transform: translateY(40px); filter: blur(5px); }
+            100% { opacity: 1; transform: translateY(0); filter: blur(0px); }
         }
 
         .story-text {
             font-size: 1.2rem; line-height: 1.9; color: #eee;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.6);
+            text-shadow: 0 2px 5px rgba(0,0,0,0.8);
             margin-bottom: 40px; white-space: pre-wrap; margin-top: 10px;
         }
 
@@ -109,33 +136,33 @@
 
         /* 選項按鈕 */
         button {
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             color: #ccc; padding: 22px; font-size: 1.05rem;
             font-family: var(--font-main); text-align: left;
             border-radius: 12px; cursor: pointer; transition: all 0.3s ease;
             display: flex; align-items: center; line-height: 1.4;
             position: relative; overflow: hidden;
             
-            /* ★ 特效：預設往下偏移並透明，等待 JS 觸發進場 */
+            /* 選項進場預設狀態 */
             opacity: 0; transform: translateY(20px);
         }
         
-        /* ★ 特效：按鈕進場動畫類別 */
+        /* 選項依序進場動畫 */
         button.btn-enter {
-            animation: btnSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+            animation: btnSlideUp 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
         }
         @keyframes btnSlideUp {
             to { opacity: 1; transform: translateY(0); }
         }
 
         button::before {
-            content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 4px;
+            content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 3px;
             background: transparent; transition: background 0.3s;
         }
         button:active, button:hover {
-            background: rgba(255, 255, 255, 0.12); color: #fff;
-            border-color: rgba(255, 255, 255, 0.5); transform: translateX(5px) scale(1.01) !important;
+            background: rgba(255, 255, 255, 0.08); color: #fff;
+            border-color: rgba(255, 255, 255, 0.3); 
         }
         button:active::before { background: var(--accent-red); }
 
@@ -150,7 +177,7 @@
         }
         .start-header h1 {
             font-weight: normal; letter-spacing: 0.3em; margin: 0 0 5px 0;
-            font-size: 1.5rem; color: #fff; text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            font-size: 1.5rem; color: #fff; text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
         }
         .start-header p { font-size: 0.8rem; color: #888; margin: 0; }
         .swipe-hint {
@@ -202,6 +229,7 @@
 <div id="game-view">
     <div class="animated-bg"></div>
     <div class="noise-overlay"></div>
+    <div class="vignette-overlay"></div>
 
     <div id="ui-layer" class="hidden">
         <div class="text-scroll-box">
@@ -247,7 +275,6 @@
 </div>
 
 <script>
-    // 遊戲數據庫 (已簡化結局選項)
     const gameData = {
         // --- 林火路線 ---
         fire_intro: {
@@ -277,7 +304,7 @@
                 { text: "重新開始", target: "start" }
             ]
         },
-        // ★ 結局：直接返回首頁
+        // ★ 結局：純文字，返回首頁
         fire_end_success: {
             text: "河明消失了，像空氣一樣淡。灰灰變胖了，然後被你拋棄。\n\n你坐在空蕩蕩的田野上，雖然孤獨，但你感到神聖。\n沒有任何關係是完全平等的，你是贏家。\n\n<span style='color:#c5a000; font-weight:bold;'>結局：荒原上的上帝</span>",
             choices: [{ text: "返回首頁", target: "start" }]
@@ -369,7 +396,7 @@
     function renderScene(sceneKey) {
         const scene = gameData[sceneKey];
 
-        // 1. 重置內容容器的動畫
+        // 1. 重置內容容器的動畫 (平滑上浮)
         sceneContent.classList.remove('animate-text-in');
         void sceneContent.offsetWidth; // trigger reflow
         sceneContent.classList.add('animate-text-in');
@@ -386,7 +413,7 @@
                 btn.innerHTML = choice.text;
                 
                 // 設定動畫延遲，讓按鈕一個接一個出現
-                btn.style.animationDelay = `${index * 0.1 + 0.3}s`;
+                btn.style.animationDelay = `${index * 0.15 + 0.4}s`;
                 btn.classList.add('btn-enter');
 
                 btn.onclick = () => {
