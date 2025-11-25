@@ -10,9 +10,9 @@
             --accent-red: #a80000;
             --accent-gold: #c5a000;
             --text-color: #e0e0e0;
-            /* 毛玻璃背景色 */
-            --glass-bg: rgba(20, 20, 20, 0.65);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            /* 毛玻璃背景色 (更深一點) */
+            --glass-bg: rgba(15, 15, 15, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.08);
         }
 
         * {
@@ -37,332 +37,157 @@
             height: 100%;
             position: relative;
             overflow: hidden;
-            /* 預設深色背景 */
-            background: #050505;
+            background: #020202;
         }
 
-        /* --- ★ 特效 1：動態呼吸背景 (流動的深色漸層) --- */
+        /* --- 動態背景與噪點特效 --- */
         .animated-bg {
             position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(-45deg, #000000, #1a1a1a, #0a0a0a, #110000);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(-45deg, #000000, #111111, #050505, #0a0000);
+            background-size: 300% 300%;
+            animation: gradientBG 20s ease infinite;
             z-index: 0;
         }
-
         @keyframes gradientBG {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
-
-        /* --- ★ 特效 2：顆粒噪點質感 (增加恐怖氛圍) --- */
         .noise-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            opacity: 0.07; /* 淡淡的雜訊 */
-            pointer-events: none;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
-        }
-
-        /* --- 背景圖片層 (結局用) --- */
-        #bg-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 2; /* 在背景特效之上 */
-            opacity: 0;
-            transition: opacity 2s ease;
-        }
-
-        .bg-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            filter: brightness(0.7); 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1; opacity: 0.08; pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
         }
 
         /* --- UI層 --- */
         #ui-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-end; 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10; display: flex; flex-direction: column; justify-content: flex-end;
             pointer-events: none;
         }
 
-        /* --- ★ 特效 3：毛玻璃文字框 --- */
+        /* 毛玻璃文字框 */
         .text-scroll-box {
-            pointer-events: auto;
-            width: 100%;
-            height: 95vh; 
-            
-            /* 毛玻璃核心代碼 */
+            pointer-events: auto; width: 100%; height: 95vh;
             background: var(--glass-bg);
-            backdrop-filter: blur(10px); /* 背景模糊 */
-            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
             border-top: 1px solid var(--glass-border);
-            
-            border-top-left-radius: 24px;
-            border-top-right-radius: 24px;
-            
-            overflow-y: auto; 
-            -webkit-overflow-scrolling: touch;
-            
-            padding: 40px 30px 100px 30px; 
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
+            border-top-left-radius: 24px; border-top-right-radius: 24px;
+            overflow-y: auto; -webkit-overflow-scrolling: touch;
+            padding: 40px 30px 100px 30px;
+            box-shadow: 0 -15px 50px rgba(0,0,0,0.9);
             scrollbar-width: none;
         }
         .text-scroll-box::-webkit-scrollbar { display: none; }
 
-        /* --- ★ 特效 4：文字進場動畫 --- */
-        .animate-in {
-            animation: textSlideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-            opacity: 0;
+        /* --- ★ 特效：文字內容容器 --- */
+        #scene-content {
+            opacity: 0; /* 預設隱藏，等 JS 觸發動畫 */
         }
-
-        @keyframes textSlideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* 文字顯示時的動畫：帶有輕微的故障感和閃爍 */
+        .animate-text-in {
+            animation: flickerFadeIn 0.8s ease-out forwards;
+        }
+        @keyframes flickerFadeIn {
+            0% { opacity: 0; transform: translateY(15px) skewX(2deg); filter: blur(5px); }
+            20% { opacity: 0.4; transform: translateY(5px) skewX(-1deg); filter: blur(2px); }
+            40% { opacity: 0.2; transform: translateY(8px) skewX(1deg); }
+            60% { opacity: 0.8; transform: translateY(2px) skewX(0deg); filter: blur(0px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
 
         .story-text {
-            font-size: 1.2rem;
-            line-height: 1.9;
-            color: #eee; /* 字體亮一點 */
-            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            margin-bottom: 40px;
-            white-space: pre-wrap;
-            margin-top: 10px; 
+            font-size: 1.2rem; line-height: 1.9; color: #eee;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.6);
+            margin-bottom: 40px; white-space: pre-wrap; margin-top: 10px;
         }
 
         .choices-box {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            width: 100%;
+            display: flex; flex-direction: column; gap: 16px; width: 100%;
         }
 
-        /* 選項按鈕美化 */
+        /* 選項按鈕 */
         button {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.06);
             border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #ccc;
-            padding: 22px;
-            font-size: 1.05rem;
-            font-family: var(--font-main);
-            text-align: left;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            line-height: 1.4;
-            position: relative;
-            overflow: hidden;
+            color: #ccc; padding: 22px; font-size: 1.05rem;
+            font-family: var(--font-main); text-align: left;
+            border-radius: 12px; cursor: pointer; transition: all 0.3s ease;
+            display: flex; align-items: center; line-height: 1.4;
+            position: relative; overflow: hidden;
+            
+            /* ★ 特效：預設往下偏移並透明，等待 JS 觸發進場 */
+            opacity: 0; transform: translateY(20px);
+        }
+        
+        /* ★ 特效：按鈕進場動畫類別 */
+        button.btn-enter {
+            animation: btnSlideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+        @keyframes btnSlideUp {
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* 按鈕左側裝飾條 */
         button::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            width: 4px;
-            background: transparent;
-            transition: background 0.3s;
+            content: ''; position: absolute; left: 0; top: 0; height: 100%; width: 4px;
+            background: transparent; transition: background 0.3s;
         }
-
         button:active, button:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
-            border-color: rgba(255, 255, 255, 0.4);
-            transform: translateX(5px); /* 輕微位移 */
+            background: rgba(255, 255, 255, 0.12); color: #fff;
+            border-color: rgba(255, 255, 255, 0.5); transform: translateX(5px) scale(1.01) !important;
         }
-
-        button:active::before {
-            background: var(--accent-red);
-        }
+        button:active::before { background: var(--accent-red); }
 
         /* --- 開始畫面 --- */
         #start-screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 20;
-            background: #050505;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            padding-top: 20px; 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 20; background: #050505; display: flex; flex-direction: column;
+            justify-content: flex-start; padding-top: 20px;
         }
-
         .start-header {
-            text-align: center;
-            flex: 0 0 auto;
-            margin-bottom: 15px;
-            z-index: 30;
+            text-align: center; flex: 0 0 auto; margin-bottom: 15px; z-index: 30;
         }
-
         .start-header h1 {
-            font-weight: normal;
-            letter-spacing: 0.3em;
-            margin: 0 0 5px 0;
-            font-size: 1.5rem;
-            color: #fff;
-            text-shadow: 0 0 15px rgba(255, 255, 255, 0.2); /* 標題發光 */
+            font-weight: normal; letter-spacing: 0.3em; margin: 0 0 5px 0;
+            font-size: 1.5rem; color: #fff; text-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
         }
-
-        .start-header p {
-            font-size: 0.8rem;
-            color: #888;
-            margin: 0;
-        }
-
+        .start-header p { font-size: 0.8rem; color: #888; margin: 0; }
         .swipe-hint {
-            font-size: 0.75rem;
-            color: var(--accent-gold);
-            margin-top: 5px;
-            opacity: 0.7;
-            animation: pulse 2s infinite;
+            font-size: 0.75rem; color: var(--accent-gold); margin-top: 5px;
+            opacity: 0.7; animation: pulse 2s infinite;
         }
-
         .char-carousel {
-            flex: 1;
-            display: flex;
-            flex-direction: row;
-            overflow-x: auto;
-            scroll-snap-type: x mandatory;
-            -webkit-overflow-scrolling: touch;
-            gap: 20px;
-            padding: 0 40px;
-            align-items: flex-start; 
-            scrollbar-width: none;
-            padding-bottom: 40px; 
+            flex: 1; display: flex; flex-direction: row; overflow-x: auto;
+            scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+            gap: 20px; padding: 0 40px; align-items: flex-start;
+            scrollbar-width: none; padding-bottom: 40px;
         }
         .char-carousel::-webkit-scrollbar { display: none; }
-
         .char-card {
-            height: 70vh; 
-            aspect-ratio: 9/16; 
-            flex-shrink: 0;
-            border-radius: 16px; /* 更圓潤 */
-            overflow: hidden;
-            position: relative;
-            scroll-snap-align: center;
-            border: 1px solid #333;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-            background: #000;
-            transition: transform 0.3s;
+            height: 70vh; aspect-ratio: 9/16; flex-shrink: 0; border-radius: 16px;
+            overflow: hidden; position: relative; scroll-snap-align: center;
+            border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            background: #000; transition: transform 0.3s;
         }
-
         .char-card img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; 
-            filter: brightness(0.85) contrast(1.1); 
-            transition: transform 0.5s;
+            width: 100%; height: 100%; object-fit: cover;
+            filter: brightness(0.85) contrast(1.1); transition: transform 0.5s;
         }
-
-        /* 選中時稍微放大 */
-        .char-card:active {
-            border-color: var(--accent-red);
-            transform: scale(0.98);
-        }
-
+        .char-card:active { border-color: var(--accent-red); transform: scale(0.98); }
         .char-info {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
+            position: absolute; bottom: 0; left: 0; width: 100%;
             padding: 40px 15px 20px 15px;
             background: linear-gradient(to top, rgba(0,0,0,1), transparent);
-            text-align: center;
-            pointer-events: none;
+            text-align: center; pointer-events: none;
         }
-
         .char-name {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #fff;
-            display: block;
-            margin-bottom: 5px;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+            font-size: 1.5rem; font-weight: bold; color: #fff; display: block;
+            margin-bottom: 5px; text-shadow: 0 2px 10px rgba(0,0,0,0.8);
         }
-        
-        .char-role {
-            font-size: 0.85rem;
-            color: var(--accent-gold);
-            letter-spacing: 1px;
-        }
+        .char-role { font-size: 0.85rem; color: var(--accent-gold); letter-spacing: 1px; }
 
-        /* 結局返回按鈕 */
-        #final-layer {
-            position: absolute;
-            bottom: 40px;
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            z-index: 50;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 1s ease 1s;
-        }
-        
-        .final-action-btn {
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(5px);
-            border: 1px solid var(--accent-gold);
-            color: var(--accent-gold);
-            padding: 18px 30px;
-            font-size: 1rem;
-            border-radius: 50px;
-            pointer-events: auto;
-            text-align: center;
-            justify-content: center;
-            width: 80%; 
-            letter-spacing: 0.1em;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
-            font-family: var(--font-main);
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .accent-btn {
-             background: rgba(197, 160, 0, 0.15);
-             border-width: 2px;
-             font-weight: bold;
-             color: #fff;
-             border-color: var(--accent-gold);
-        }
-
-        .final-action-btn:active {
-            transform: scale(0.95);
-            background: var(--accent-gold);
-            color: #000;
-        }
-
-        /* 輔助動畫 */
+        /* 輔助樣式 */
         .hidden { display: none !important; }
         @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
         .shake { animation: shake 0.5s; }
@@ -375,26 +200,16 @@
 <body>
 
 <div id="game-view">
-    
     <div class="animated-bg"></div>
     <div class="noise-overlay"></div>
 
-    <div id="bg-layer">
-        <img id="current-bg" class="bg-img" src="" alt="">
-    </div>
-
     <div id="ui-layer" class="hidden">
         <div class="text-scroll-box">
-            <div id="scene-content" class="animate-in">
+            <div id="scene-content">
                 <div id="story-text" class="story-text"></div>
                 <div id="choices-box" class="choices-box"></div>
             </div>
         </div>
-    </div>
-
-    <div id="final-layer">
-        <button id="download-btn" class="final-action-btn accent-btn">獲得結局圖片</button>
-        <button id="home-btn" class="final-action-btn" onclick="startGame('start')">返回首頁</button>
     </div>
 
     <div id="start-screen">
@@ -432,6 +247,7 @@
 </div>
 
 <script>
+    // 遊戲數據庫 (已簡化結局選項)
     const gameData = {
         // --- 林火路線 ---
         fire_intro: {
@@ -461,14 +277,14 @@
                 { text: "重新開始", target: "start" }
             ]
         },
-        // ★ 結局
+        // ★ 結局：直接返回首頁
         fire_end_success: {
             text: "河明消失了，像空氣一樣淡。灰灰變胖了，然後被你拋棄。\n\n你坐在空蕩蕩的田野上，雖然孤獨，但你感到神聖。\n沒有任何關係是完全平等的，你是贏家。\n\n<span style='color:#c5a000; font-weight:bold;'>結局：荒原上的上帝</span>",
-            choices: [{ text: "凝視結局畫面", type: "visual_end", image: "fire1.jpg" }]
+            choices: [{ text: "返回首頁", target: "start" }]
         },
         fire_end_fail: {
             text: "那一瞬間的猶豫，讓你從神壇跌落。\n\n你意識到自己只是一個飢餓的普通男人。野草瘋長，將你淹沒。\n\n<span style='color:#a80000; font-weight:bold;'>結局：凡人的飢餓</span>",
-            choices: [{ text: "凝視結局畫面", type: "visual_end", image: "fire1.jpg" }]
+            choices: [{ text: "返回首頁", target: "start" }]
         },
 
         // --- 灰灰路線 ---
@@ -488,15 +304,15 @@
         },
         hui_escape: {
             text: "你離開了那個房間。你拿出餐單，然後把它揉爛。\n\n你開始渴望脂肪。你的身體開始膨脹，像一層盔甲。身旁的座位是空的，沒人能擠壓你。\n\n<span style='color:#c5a000; font-weight:bold;'>結局：脂肪堡壘</span>",
-            choices: [{ text: "凝視結局畫面", type: "visual_end", image: "fire2.jpg" }]
+            choices: [{ text: "返回首頁", target: "start" }]
         },
         hui_hide: {
             text: "你拒絕張開嘴。林火的表情變了。\n\n那團灰霧開始令人窒息。你試圖躲進影子，但影子也是他的。你發現自己無處可逃。\n\n<span style='color:#a80000; font-weight:bold;'>結局：被霧吞噬</span>",
-            choices: [{ text: "凝視結局畫面", type: "visual_end", image: "fire2.jpg" }]
+            choices: [{ text: "返回首頁", target: "start" }]
         },
         hui_bad_end: {
             text: "你變得越來越瘦，越來越聽話。\n\n你只是一具被他擺弄的人偶。有一天，他厭倦了，把你扔在角落。\n\n<span style='color:#a80000; font-weight:bold;'>結局：人皮刺繡</span>",
-            choices: [{ text: "凝視結局畫面", type: "visual_end", image: "fire2.jpg" }]
+            choices: [{ text: "返回首頁", target: "start" }]
         },
 
         // --- 以太路線 ---
@@ -509,7 +325,7 @@
         },
         ether_pain: {
             text: "他給你劇痛。你慘叫，但內心卻平靜了。\n\n「愛的意思就是，我可以任意傷害你。」他說。\n\n你在毀滅中確認存在。\n\n<span style='color:#a80000; font-weight:bold;'>結局：痛覺成癮者</span>",
-            choices: [{ text: "凝視結局畫面", type: "visual_end", image: "fire3.jpg" }]
+            choices: [{ text: "返回首頁", target: "start" }]
         },
         ether_wood: {
             text: "你離開了火，遇到了木。\n\n木是安全的。他給你買了房子，全是「實」的牆壁。\n\n在一場遊戲中，木擁抱你。所有人都在歡呼，但你卻感到前所未有的寂寞。",
@@ -520,26 +336,22 @@
         },
         ether_hollow_end: {
             text: "你穿著白色的禮服，扮演著幸福的角色。\n\n木抱著的不是你，是那個角色。你在安全的房子裡，慢慢變成了一個幽靈。\n\n<span style='color:#c5a000; font-weight:bold;'>結局：衣櫃裡的幽靈</span>",
-            choices: [{ text: "凝視結局畫面", type: "visual_end", image: "fire3.jpg" }]
+            choices: [{ text: "返回首頁", target: "start" }]
         },
         ether_regret: {
             text: "在深夜，你敲著實心的牆壁，聽不到回音。\n\n你想起了火的暴虐。你打開窗戶，看著下方。或許墜落的痛楚能讓你醒過來？\n\n<span style='color:#a80000; font-weight:bold;'>結局：未完成的墜落</span>",
-            choices: [{ text: "凝視結局畫面", type: "visual_end", image: "fire3.jpg" }]
+            choices: [{ text: "返回首頁", target: "start" }]
         }
     };
 
     // DOM 元素
     const startScreen = document.getElementById('start-screen');
     const uiLayer = document.getElementById('ui-layer');
-    const finalLayer = document.getElementById('final-layer');
     const storyTextEl = document.getElementById('story-text');
     const choicesBoxEl = document.getElementById('choices-box');
     const sceneContent = document.getElementById('scene-content');
-    const bgLayer = document.getElementById('bg-layer');
-    const bgImgEl = document.getElementById('current-bg');
     const gameView = document.getElementById('game-view');
     const textScrollBox = document.querySelector('.text-scroll-box');
-    const downloadBtn = document.getElementById('download-btn');
 
     // 開始遊戲
     function startGame(startSceneKey) {
@@ -553,68 +365,39 @@
         renderScene(startSceneKey);
     }
 
-    // 觸發結局圖片顯示
-    function showFinalVisual(imgSrc) {
-        bgImgEl.src = imgSrc;
-        
-        // 設定下載功能
-        downloadBtn.onclick = () => {
-            const a = document.createElement('a');
-            a.href = imgSrc;
-            a.download = 'ending_card.jpg';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        };
-
-        // 轉場：UI層淡出，背景圖淡入
-        uiLayer.style.opacity = 0;
-        setTimeout(() => {
-            uiLayer.classList.add('hidden');
-            uiLayer.style.opacity = 1;
-        }, 500);
-
-        bgLayer.style.opacity = 1;
-        finalLayer.style.opacity = 1;
-    }
-
     // 渲染場景
     function renderScene(sceneKey) {
         const scene = gameData[sceneKey];
 
-        // 預設隱藏結局層
-        bgLayer.style.opacity = 0;
-        finalLayer.style.opacity = 0;
-
-        // 重置文字動畫
-        sceneContent.classList.remove('animate-in');
+        // 1. 重置內容容器的動畫
+        sceneContent.classList.remove('animate-text-in');
         void sceneContent.offsetWidth; // trigger reflow
-        sceneContent.classList.add('animate-in');
+        sceneContent.classList.add('animate-text-in');
 
-        // 更新文字
+        // 2. 更新文字
         storyTextEl.innerHTML = scene.text;
         textScrollBox.scrollTop = 0;
 
-        // 生成選項
+        // 3. 生成選項 (帶有依序進場動畫)
         choicesBoxEl.innerHTML = '';
         if (scene.choices) {
-            scene.choices.forEach(choice => {
+            scene.choices.forEach((choice, index) => {
                 const btn = document.createElement('button');
                 btn.innerHTML = choice.text;
                 
+                // 設定動畫延遲，讓按鈕一個接一個出現
+                btn.style.animationDelay = `${index * 0.1 + 0.3}s`;
+                btn.classList.add('btn-enter');
+
                 btn.onclick = () => {
-                    if (choice.type === "visual_end") {
-                        showFinalVisual(choice.image);
+                    if (choice.target === 'start') {
+                        location.reload();
                     } else {
-                        if (choice.target === 'start') {
-                            location.reload();
-                        } else {
-                            if (sceneKey === 'fire_sickle' || sceneKey === 'ether_intro') {
-                                gameView.classList.add('shake');
-                                setTimeout(() => gameView.classList.remove('shake'), 500);
-                            }
-                            renderScene(choice.target);
+                        if (sceneKey === 'fire_sickle' || sceneKey === 'ether_intro') {
+                            gameView.classList.add('shake');
+                            setTimeout(() => gameView.classList.remove('shake'), 500);
                         }
+                        renderScene(choice.target);
                     }
                 };
                 choicesBoxEl.appendChild(btn);
