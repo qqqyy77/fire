@@ -188,8 +188,10 @@
         }
         .char-carousel::-webkit-scrollbar { display: none; }
 
+        /* --- 修改重點在這裡 --- */
         .char-card {
-            height: 60vh; 
+            /* 將高度從 60vh 稍微增加到 63vh，讓卡片略大一點點 */
+            height: 63vh; 
             aspect-ratio: 9/16; 
             flex-shrink: 0;
             border-radius: 12px;
@@ -237,21 +239,17 @@
             text-shadow: 0 2px 10px rgba(0,0,0,0.8);
         }
         
-        /* --- 修改重點在這裡 --- */
         .char-role {
             font-size: 0.85rem;
             color: var(--accent-gold);
             text-shadow: 0 1px 3px rgba(0,0,0,1);
             line-height: 1.4;
             display: block;
-            /* 修改 1: 移除原本的 white-space: normal; */
-            max-width: 95%; /* 稍微放寬一點寬度 */
+            max-width: 95%; 
             margin: 0 auto;
-            
-            /* 修改 2: 加入以下三行來達成單行省略效果 */
-            white-space: nowrap;      /* 強制不換行 */
-            overflow: hidden;         /* 超出範圍隱藏 */
-            text-overflow: ellipsis;  /* 超出部分顯示省略號 (...) */
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         /* --- 輔助樣式 --- */
@@ -295,7 +293,7 @@
                 <img src="fire1.jpg" alt="林火">
                 <div class="char-info">
                     <span class="char-name">林火</span>
-                    <span class="char-role">「愛的意思就是，我可以任意傷害你。」</span>
+                    <span class="char-role">「是我要它們長得如此瘋狂。」</span>
                 </div>
             </div>
             <div class="char-card" onclick="startGame('hui_intro')">
