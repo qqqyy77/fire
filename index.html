@@ -10,12 +10,13 @@
             --accent-red: #a80000;
             --accent-gold: #c5a000;
             --text-color: #e0e0e0;
-            --overlay-bg: linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.7) 60%, rgba(0,0,0,0) 100%);
+            /* 文字區背景漸層：上方透明，下方深黑，確保閱讀性 */
+            --overlay-bg: linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.9) 30%, rgba(0,0,0,1) 100%);
         }
 
         * {
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
+            -webkit-tap-highlight-color: transparent; /* 移除手機點擊時的藍色高光 */
         }
 
         body {
@@ -24,26 +25,22 @@
             background-color: #000;
             font-family: var(--font-main);
             color: var(--text-color);
-            height: 100vh; /* 手機全屏 */
+            height: 100vh;
             width: 100vw;
-            overflow: hidden; /* 禁止滾動 */
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            overflow: hidden; /* 防止整個頁面彈動，滾動交給內部容器 */
+            position: fixed; /* 固定頁面，避免 iOS safari 網址列干擾 */
         }
 
-        /* 遊戲主容器：模擬手機比例 */
+        /* 遊戲主容器 */
         #game-view {
             width: 100%;
             height: 100%;
-            max-width: 500px; /* 桌面版限制最大寬度，像手機模擬器 */
             position: relative;
             background: #111;
             overflow: hidden;
-            box-shadow: 0 0 50px rgba(0,0,0,0.8);
         }
 
-        /* --- 背景圖片層 --- */
+        /* --- 背景圖片層 (固定不動) --- */
         #bg-layer {
             position: absolute;
             top: 0;
@@ -51,52 +48,61 @@
             width: 100%;
             height: 100%;
             z-index: 0;
-            transition: opacity 0.8s ease-in-out;
         }
 
         .bg-img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* 確保填滿螢幕 */
+            object-fit: cover;
             object-position: center;
-            filter: brightness(0.7); /* 稍微壓暗，讓文字突出 */
+            filter: brightness(0.7); /* 稍微壓暗 */
             position: absolute;
             top: 0;
             left: 0;
+            transition: opacity 0.5s ease;
         }
 
         /* --- UI層：包含文字與選項 --- */
         #ui-layer {
             position: absolute;
-            bottom: 0;
+            top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             z-index: 10;
+            /* 使用 flex 佈局讓文字區靠下 */
             display: flex;
             flex-direction: column;
-            justify-content: flex-end; /* 內容靠下 */
-            pointer-events: none; /* 讓點擊穿透到按鈕 */
+            justify-content: flex-end; 
+            pointer-events: none; /* 讓點擊穿透到背景(如果有需要交互) */
         }
 
-        /* 底部漸層遮罩 */
-        .text-overlay {
+        /* ★ 修復滑動關鍵：可滾動的文字遮罩區域 */
+        .text-overlay-scroll-container {
+            pointer-events: auto; /* 恢復點擊與滾動交互 */
+            width: 100%;
+            /* 限制最大高度為螢幕的 70%，超過則出現滾動條 */
+            max-height: 70vh; 
+            overflow-y: auto; /* 允許垂直滾動 */
+            -webkit-overflow-scrolling: touch; /* iOS 平滑滾動支援 */
             background: var(--overlay-bg);
-            padding: 80px 25px 40px 25px; /* 上方留空間給漸層 */
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            pointer-events: auto; /* 恢復點擊 */
-            animation: slideUp 0.6s ease-out;
+            /* 上方加入 padding 讓漸層自然過渡 */
+            padding: 60px 25px 40px 25px;
+            /* 底部圓角，視覺上比較柔和 */
+            border-top-left-radius: 20px;
+            border-top-right-radius: 20px;
+            animation: slideUp 0.5s ease-out;
         }
 
         /* 劇情文字 */
         .story-text {
             font-size: 1.1rem;
             line-height: 1.8;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,1);
+            margin-bottom: 25px;
             white-space: pre-wrap;
+            /* 增加底部 padding 以防文字被按鈕擋住 */
+            padding-bottom: 10px;
         }
 
         /* 選項按鈕容器 */
@@ -104,22 +110,25 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            padding-bottom: 20px; /* 確保最後一個按鈕不會貼底 */
         }
 
         /* 選項按鈕 */
         button {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(50, 50, 50, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: #fff;
-            padding: 16px;
+            padding: 18px;
             font-size: 1rem;
             font-family: var(--font-main);
             text-align: left;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.2s;
             text-shadow: 0 1px 2px black;
+            /* 防止按鈕文字被選取 */
+            user-select: none; 
         }
 
         button:active {
@@ -128,7 +137,7 @@
             transform: scale(0.98);
         }
 
-        /* --- 開始畫面專用樣式 --- */
+        /* --- ★ 全新設計：開始畫面 (左右滑動輪播) --- */
         #start-screen {
             position: absolute;
             top: 0;
@@ -136,93 +145,121 @@
             width: 100%;
             height: 100%;
             z-index: 20;
-            background: #000;
+            background: #0a0a0a; /* 深色背景 */
             display: flex;
             flex-direction: column;
+            justify-content: center;
+            padding-bottom: 40px;
         }
 
         .start-header {
-            position: absolute;
-            top: 40px;
-            width: 100%;
             text-align: center;
+            margin-bottom: 20px;
             z-index: 30;
-            pointer-events: none;
-            text-shadow: 0 4px 10px rgba(0,0,0,1);
+            text-shadow: 0 2px 10px rgba(0,0,0,1);
         }
 
         .start-header h1 {
             font-weight: normal;
-            letter-spacing: 0.5em;
-            margin: 0;
+            letter-spacing: 0.3em;
+            margin: 0 0 10px 0;
             font-size: 1.8rem;
             color: #fff;
         }
 
         .start-header p {
             font-size: 0.9rem;
-            color: #aaa;
-            margin-top: 10px;
+            color: #888;
+            margin: 0;
             letter-spacing: 0.1em;
         }
 
-        /* 三個角色長條圖 */
-        .char-strip-container {
-            flex: 1;
+        .swipe-hint {
+            font-size: 0.8rem;
+            color: var(--accent-gold);
+            margin-top: 10px;
+            opacity: 0.8;
+            animation: pulse 2s infinite;
+        }
+
+        /* 角色卡片輪播容器 */
+        .char-carousel {
             display: flex;
-            flex-direction: column; /* 手機上下排列 */
+            flex-direction: row; /* 橫向排列 */
+            overflow-x: auto; /* 允許橫向滾動 */
+            /* 關鍵：啟用滾動捕捉，讓卡片滑動時會自動對齊 */
+            scroll-snap-type: x mandatory; 
+            -webkit-overflow-scrolling: touch;
+            gap: 20px;
+            padding: 0 25px; /* 兩側留白 */
+            height: 65vh; /* 卡片區域高度 */
+            align-items: center; /* 垂直居中 */
+            /* 隱藏滾動條 (Chrome/Safari) */
+            scrollbar-width: none; 
         }
+        .char-carousel::-webkit-scrollbar { display: none; }
 
-        .char-strip {
-            flex: 1;
+        /* 角色卡片 */
+        .char-card {
             position: relative;
+            /* 卡片寬度佔螢幕 80%，讓使用者能看到前後有其他卡片 */
+            min-width: 80vw; 
+            height: 100%;
+            border-radius: 16px;
             overflow: hidden;
-            cursor: pointer;
-            border-bottom: 1px solid #000;
+            /* 關鍵：設定捕捉點為卡片中心 */
+            scroll-snap-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+            transition: transform 0.3s ease;
+            flex-shrink: 0; /* 防止卡片被壓縮 */
         }
 
-        .char-strip img {
+        .char-card img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            /* 調整圖片位置，確保人臉或重點在長條中可見 */
-            object-position: center 20%; 
             filter: grayscale(100%) brightness(0.6);
             transition: all 0.5s ease;
         }
+        
+        /* 選中態（手機上 active 效果較好）*/
+        .char-card:active img {
+            filter: grayscale(0%) brightness(1);
+        }
+        .char-card:active {
+            border-color: var(--accent-red);
+        }
 
-        .char-label {
+        .char-info {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
-            z-index: 2;
-            text-shadow: 0 2px 10px rgba(0,0,0,1);
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 30px 20px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            text-align: center;
         }
 
         .char-name {
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: bold;
             color: #fff;
             display: block;
+            margin-bottom: 5px;
         }
         
         .char-role {
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             color: var(--accent-gold);
             letter-spacing: 0.1em;
         }
 
-        /* 點擊或選中效果 */
-        .char-strip:active img, .char-strip:hover img {
-            filter: grayscale(0%) brightness(1);
-            transform: scale(1.05);
-        }
-
         /* --- 輔助樣式 --- */
         .hidden { display: none !important; }
-        .fade-in { animation: fadeIn 1s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
         
         .highlight-gold { color: var(--accent-gold); font-weight: bold;}
         .highlight-red { color: var(--accent-red); font-weight: bold;}
@@ -230,10 +267,7 @@
         /* 震動效果 */
         .shake { animation: shake 0.5s; }
         @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(-5px) rotate(-1deg); }
-            75% { transform: translateX(5px) rotate(1deg); }
-            100% { transform: translateX(0); }
+            0% { transform: translateX(0); } 25% { transform: translateX(-5px) rotate(-1deg); } 75% { transform: translateX(5px) rotate(1deg); } 100% { transform: translateX(0); }
         }
 
     </style>
@@ -247,7 +281,7 @@
     </div>
 
     <div id="ui-layer" class="hidden">
-        <div class="text-overlay">
+        <div class="text-overlay-scroll-container">
             <div id="story-text" class="story-text"></div>
             <div id="choices-box" class="choices-box"></div>
         </div>
@@ -256,26 +290,28 @@
     <div id="start-screen">
         <div class="start-header">
             <h1>人皮刺繡</h1>
-            <p>請選擇你的皮膚</p>
+            <p>點擊卡片進入皮膚</p>
+            <div class="swipe-hint">← 左右滑動選擇 →</div>
         </div>
-        <div class="char-strip-container">
-            <div class="char-strip" onclick="startGame('fire_intro')">
-                <img src="fire1.jpg" alt="林火">
-                <div class="char-label">
+        
+        <div class="char-carousel">
+            <div class="char-card" onclick="startGame('fire_intro')">
+                <img src="images/fire1.jpg" alt="林火">
+                <div class="char-info">
                     <span class="char-name">林火</span>
                     <span class="char-role">上帝 / 鐮刀 / 農夫</span>
                 </div>
             </div>
-            <div class="char-strip" onclick="startGame('hui_intro')">
-                <img src="fire2.jpg" alt="灰灰">
-                <div class="char-label">
+            <div class="char-card" onclick="startGame('hui_intro')">
+                <img src="images/fire2.jpg" alt="灰灰">
+                <div class="char-info">
                     <span class="char-name">灰灰</span>
                     <span class="char-role">脂肪 / 陰影 / 餐盤</span>
                 </div>
             </div>
-            <div class="char-strip" onclick="startGame('ether_intro')">
-                <img src="fire3.jpg" alt="以太">
-                <div class="char-label">
+            <div class="char-card" onclick="startGame('ether_intro')">
+                <img src="images/fire3.jpg" alt="以太">
+                <div class="char-info">
                     <span class="char-name">以太</span>
                     <span class="char-role">痛覺 / 人偶 / 虛無</span>
                 </div>
@@ -286,10 +322,11 @@
 </div>
 
 <script>
+    // 遊戲數據 (保持不變)
     const gameData = {
         // --- 林火路線 ---
         fire_intro: {
-            image: "fire1.jpg",
+            image: "images/fire1.jpg",
             text: "你看著眼前的田野。雖然她們看起來像是女人——河明、以太、灰灰——但在你眼裡，那只是待割的<span class='highlight-gold'>野草</span>。\n\n你聽見樹對你說：「你要謙卑。」\n你笑著回答：「我不需要上帝，我就是上帝。」\n\n今天，你要如何處置這些野草？",
             choices: [
                 { text: "使用【照相機】。拍下她們，奪走靈魂。", target: "fire_camera" },
@@ -297,7 +334,7 @@
             ]
         },
         fire_camera: {
-            image: "fire1.jpg",
+            image: "images/fire1.jpg",
             text: "你舉起相機。對焦。\n\n灰灰在鏡頭裡無所遁形。照片背後寫著：「想你的時刻。」\n\n這不是愛，這是狩獵。河明看見照片後，交出了她所有的積蓄。\n\n你看著存摺上的數字，這是一種收割。",
             choices: [
                 { text: "繼續索取，直到她變成空氣。", target: "fire_end_success" },
@@ -305,7 +342,7 @@
             ]
         },
         fire_sickle: {
-            image: "fire1.jpg",
+            image: "images/fire1.jpg",
             text: "你走進野草之間。草割破了你的手背，流出血來。\n\n你嗅到了血的氣味。以太正在床上等你，像一頭受傷的獸。\n\n你手裡拿著工具。她需要殘忍，你很清楚。",
             choices: [
                 { text: "給予她毀滅性的痛，這是她要的安全感。", target: "fire_sadism" },
@@ -313,26 +350,26 @@
             ]
         },
         fire_sadism: {
-            image: "ire1.jpg",
+            image: "images/fire1.jpg",
             text: "你沒有停下。你用言語和行為將她拆解。\n\n「愛的意思就是，我可以任意傷害你。」你心裡這樣想。\n\n但在夢裡，你看到她為你死去的樣子。那是最美的獻祭。\n\n<span class='highlight-gold'>你成功種植了你的上帝。</span>",
             choices: [
                 { text: "重新開始", target: "start" }
             ]
         },
         fire_end_success: {
-            image: "fire1.jpg",
+            image: "images/fire1.jpg",
             text: "河明消失了，像空氣一樣淡。灰灰變胖了，然後被你拋棄。\n\n你坐在空蕩蕩的田野上，雖然孤獨，但你感到神聖。\n沒有任何關係是完全平等的，你是贏家。\n\n<span class='highlight-gold'>結局：荒原上的上帝</span>",
             choices: [{ text: "返回", target: "start" }]
         },
         fire_end_fail: {
-            image: "fire1.jpg",
+            image: "images/fire1.jpg",
             text: "那一瞬間的猶豫，讓你從神壇跌落。\n\n你意識到自己只是一個飢餓的普通男人。野草瘋長，將你淹沒。\n\n<span class='highlight-red'>結局：凡人的飢餓</span>",
             choices: [{ text: "返回", target: "start" }]
         },
 
         // --- 灰灰路線 ---
         hui_intro: {
-            image: "fire2.jpg",
+            image: "images/fire2.jpg",
             text: "天氣太熱了。你蹲在地上，試圖把自己縮進最深最黑的影子裡。\n\n林火端來了食物，那是你最討厭的濃湯。\n\n他盯著你。「吃下去，」他的眼神說，「這也是愛。」\n\n你的胃在翻騰。",
             choices: [
                 { text: "【進食】 順從他，讓他滿意。", target: "hui_eat" },
@@ -340,7 +377,7 @@
             ]
         },
         hui_eat: {
-            image: "fire2.jpg",
+            image: "images/fire2.jpg",
             text: "你張開嘴。食物滑進喉嚨，像石頭一樣沉重。\n\n他在微笑。那是捕食者的微笑。\n\n你看著鏡子，你變瘦了，這很不合理。你正在被他「吃掉」。",
             choices: [
                 { text: "繼續這樣下去，直到消失。", target: "hui_bad_end" },
@@ -348,24 +385,24 @@
             ]
         },
         hui_escape: {
-            image: "fire2.jpg",
+            image: "images/fire2.jpg",
             text: "你離開了那個房間。你拿出餐單，然後把它揉爛。\n\n你開始渴望脂肪。你的身體開始膨脹，像一層盔甲。身旁的座位是空的，沒人能擠壓你。\n\n<span class='highlight-gold'>結局：脂肪堡壘</span>",
             choices: [{ text: "返回", target: "start" }]
         },
         hui_hide: {
-            image: "fire2.jpg",
+            image: "images/fire2.jpg",
             text: "你拒絕張開嘴。林火的表情變了。\n\n那團灰霧開始令人窒息。你試圖躲進影子，但影子也是他的。你發現自己無處可逃。\n\n<span class='highlight-red'>結局：被霧吞噬</span>",
             choices: [{ text: "返回", target: "start" }]
         },
         hui_bad_end: {
-            image: "fire2.jpg",
+            image: "images/fire2.jpg",
             text: "你變得越來越瘦，越來越聽話。\n\n你只是一具被他擺弄的人偶。有一天，他厭倦了，把你扔在角落。\n\n<span class='highlight-red'>結局：人皮刺繡</span>",
             choices: [{ text: "返回", target: "start" }]
         },
 
         // --- 以太路線 ---
         ether_intro: {
-            image: "fire3.jpg",
+            image: "images/fire3.jpg",
             text: "從小，你就試圖保持腹部的空洞。\n但現在，那種虛無讓你恐懼。\n\n阿火拿著工具站在你面前。他的眼神是唯一的熱源。\n\n「你知道你對我做了什麼嗎？」你問。",
             choices: [
                 { text: "因為恐懼而順從，渴望他的殘忍。", target: "ether_pain" },
@@ -373,12 +410,12 @@
             ]
         },
         ether_pain: {
-            image: "fire3.jpg",
+            image: "images/fire3.jpg",
             text: "他給你劇痛。你慘叫，但內心卻平靜了。\n\n「愛的意思就是，我可以任意傷害你。」他說。\n\n你在毀滅中確認存在。\n\n<span class='highlight-red'>結局：痛覺成癮者</span>",
             choices: [{ text: "返回", target: "start" }]
         },
         ether_wood: {
-            image: "fire3.jpg",
+            image: "images/fire3.jpg",
             text: "你離開了火，遇到了木。\n\n木是安全的。他給你買了房子，全是「實」的牆壁。\n\n在一場遊戲中，木擁抱你。所有人都在歡呼，但你卻感到前所未有的寂寞。",
             choices: [
                 { text: "接受這份虛假的安全。", target: "ether_hollow_end" },
@@ -386,12 +423,12 @@
             ]
         },
         ether_hollow_end: {
-            image: "fire3.jpg",
+            image: "images/fire3.jpg",
             text: "你穿著白色的禮服，扮演著幸福的角色。\n\n木抱著的不是你，是那個角色。你在安全的房子裡，慢慢變成了一個幽靈。\n\n<span class='highlight-gold'>結局：衣櫃裡的幽靈</span>",
             choices: [{ text: "返回", target: "start" }]
         },
         ether_regret: {
-            image: "fire3.jpg",
+            image: "images/fire3.jpg",
             text: "在深夜，你敲著實心的牆壁，聽不到回音。\n\n你想起了火的暴虐。你打開窗戶，看著下方。或許墜落的痛楚能讓你醒過來？\n\n<span class='highlight-red'>結局：未完成的墜落</span>",
             choices: [{ text: "返回", target: "start" }]
         }
@@ -404,6 +441,7 @@
     const choicesBoxEl = document.getElementById('choices-box');
     const bgImgEl = document.getElementById('current-bg');
     const gameView = document.getElementById('game-view');
+    const textScrollContainer = document.querySelector('.text-overlay-scroll-container');
 
     // 開始遊戲
     function startGame(startSceneKey) {
@@ -428,11 +466,18 @@
 
         // 1. 切換圖片
         if (scene.image && bgImgEl.src !== scene.image) {
-            bgImgEl.src = scene.image;
+            bgImgEl.style.opacity = 0; // 先淡出
+            setTimeout(() => {
+                bgImgEl.src = scene.image;
+                bgImgEl.style.opacity = 1; // 再淡入
+            }, 300);
         }
 
         // 2. 更新文字
         storyTextEl.innerHTML = scene.text;
+        
+        // ★ 關鍵：每次切換場景時，將文字滾動條重置到最上方
+        textScrollContainer.scrollTop = 0;
 
         // 3. 生成選項
         choicesBoxEl.innerHTML = '';
