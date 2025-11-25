@@ -10,8 +10,9 @@
             --accent-red: #a80000;
             --accent-gold: #c5a000;
             --text-color: #e0e0e0;
-            --scene-bg-color: #050505;
-            --overlay-bg: rgba(10, 10, 10, 0.9);
+            /* 毛玻璃背景色 */
+            --glass-bg: rgba(20, 20, 20, 0.65);
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
 
         * {
@@ -35,18 +36,51 @@
             width: 100%;
             height: 100%;
             position: relative;
-            background: var(--scene-bg-color);
-            transition: background 0.5s;
+            overflow: hidden;
+            /* 預設深色背景 */
+            background: #050505;
         }
 
-        /* --- 背景圖片層 (結局第二階段顯示) --- */
+        /* --- ★ 特效 1：動態呼吸背景 (流動的深色漸層) --- */
+        .animated-bg {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(-45deg, #000000, #1a1a1a, #0a0a0a, #110000);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            z-index: 0;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* --- ★ 特效 2：顆粒噪點質感 (增加恐怖氛圍) --- */
+        .noise-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.07; /* 淡淡的雜訊 */
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='1'/%3E%3C/svg%3E");
+        }
+
+        /* --- 背景圖片層 (結局用) --- */
         #bg-layer {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            z-index: 0;
+            z-index: 2; /* 在背景特效之上 */
             opacity: 0;
             transition: opacity 2s ease;
         }
@@ -55,12 +89,10 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            object-position: center;
-            /* 結局圖片稍微保持一點亮度，讓人想收藏 */
-            filter: brightness(0.85); 
+            filter: brightness(0.7); 
         }
 
-        /* --- UI層：文字與選項 --- */
+        /* --- UI層 --- */
         #ui-layer {
             position: absolute;
             top: 0;
@@ -72,30 +104,48 @@
             flex-direction: column;
             justify-content: flex-end; 
             pointer-events: none;
-            transition: opacity 0.5s;
         }
 
-        /* 文字滾動容器 */
+        /* --- ★ 特效 3：毛玻璃文字框 --- */
         .text-scroll-box {
             pointer-events: auto;
             width: 100%;
             height: 95vh; 
-            background: var(--overlay-bg);
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
+            
+            /* 毛玻璃核心代碼 */
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px); /* 背景模糊 */
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid var(--glass-border);
+            
+            border-top-left-radius: 24px;
+            border-top-right-radius: 24px;
+            
             overflow-y: auto; 
             -webkit-overflow-scrolling: touch;
+            
             padding: 40px 30px 100px 30px; 
-            animation: slideUp 0.4s ease-out;
-            box-shadow: 0 -10px 40px rgba(0,0,0,1);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.8);
             scrollbar-width: none;
         }
         .text-scroll-box::-webkit-scrollbar { display: none; }
 
+        /* --- ★ 特效 4：文字進場動畫 --- */
+        .animate-in {
+            animation: textSlideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            opacity: 0;
+        }
+
+        @keyframes textSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .story-text {
             font-size: 1.2rem;
             line-height: 1.9;
-            color: #ddd;
+            color: #eee; /* 字體亮一點 */
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
             margin-bottom: 40px;
             white-space: pre-wrap;
             margin-top: 10px; 
@@ -108,77 +158,49 @@
             width: 100%;
         }
 
+        /* 選項按鈕美化 */
         button {
             background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ccc;
             padding: 22px;
             font-size: 1.05rem;
             font-family: var(--font-main);
             text-align: left;
-            border-radius: 8px;
+            border-radius: 12px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
             display: flex;
             align-items: center;
             line-height: 1.4;
+            position: relative;
+            overflow: hidden;
         }
 
-        button:active {
-            background: var(--accent-red);
-            border-color: var(--accent-red);
-            transform: scale(0.98);
-        }
-
-        /* --- ★ 結局專用層 (雙按鈕) --- */
-        #final-layer {
+        /* 按鈕左側裝飾條 */
+        button::before {
+            content: '';
             position: absolute;
-            bottom: 40px;
-            width: 100%;
-            /* 使用 flex 垂直排列兩個按鈕 */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px; /* 按鈕間距 */
-            z-index: 50;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 1s ease 1s;
-        }
-        
-        /* 結局按鈕通用樣式 */
-        .final-action-btn {
-            background: rgba(0, 0, 0, 0.7);
-            border: 1px solid var(--accent-gold);
-            color: var(--accent-gold);
-            padding: 18px 30px;
-            font-size: 1rem;
-            border-radius: 50px;
-            pointer-events: auto;
-            text-align: center;
-            justify-content: center;
-            width: 80%; /* 按鈕寬度 */
-            letter-spacing: 0.1em;
-            box-shadow: 0 0 20px rgba(0,0,0,0.8);
-            font-family: var(--font-main);
-            cursor: pointer;
-            transition: all 0.3s;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: transparent;
+            transition: background 0.3s;
         }
 
-        /* 強調「獲得圖片」的按鈕樣式 */
-        .accent-btn {
-             background: rgba(197, 160, 0, 0.15);
-             border-width: 2px;
-             font-weight: bold;
+        button:active, button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateX(5px); /* 輕微位移 */
         }
 
-        .final-action-btn:active {
-            transform: scale(0.95);
-            background: var(--accent-gold);
-            color: #000;
+        button:active::before {
+            background: var(--accent-red);
         }
 
-        /* --- ★ 開始畫面 (調整版) --- */
+        /* --- 開始畫面 --- */
         #start-screen {
             position: absolute;
             top: 0;
@@ -186,20 +208,18 @@
             width: 100%;
             height: 100%;
             z-index: 20;
-            background: #080808;
+            background: #050505;
             display: flex;
             flex-direction: column;
             justify-content: flex-start;
-            /* 減少上方留白，讓整體往上移 */
-            padding-top: 3vh; 
+            padding-top: 20px; 
         }
 
         .start-header {
             text-align: center;
-            /* 減少標題與圖片的間距 */
-            margin-bottom: 2vh; 
+            flex: 0 0 auto;
+            margin-bottom: 15px;
             z-index: 30;
-            width: 100%;
         }
 
         .start-header h1 {
@@ -208,54 +228,61 @@
             margin: 0 0 5px 0;
             font-size: 1.5rem;
             color: #fff;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.2); /* 標題發光 */
         }
 
         .start-header p {
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: #888;
             margin: 0;
         }
 
-        /* 卡片輪播容器 */
+        .swipe-hint {
+            font-size: 0.75rem;
+            color: var(--accent-gold);
+            margin-top: 5px;
+            opacity: 0.7;
+            animation: pulse 2s infinite;
+        }
+
         .char-carousel {
-            width: 100%;
+            flex: 1;
             display: flex;
             flex-direction: row;
             overflow-x: auto;
             scroll-snap-type: x mandatory;
             -webkit-overflow-scrolling: touch;
             gap: 20px;
-            padding: 0 50px;
-            align-items: center; 
+            padding: 0 40px;
+            align-items: flex-start; 
             scrollbar-width: none;
-            /* 讓容器佔滿剩餘空間，確保卡片能盡量大 */
-            flex: 1; 
-            /* 底部留一點空間 */
-            padding-bottom: 20px;
+            padding-bottom: 40px; 
         }
         .char-carousel::-webkit-scrollbar { display: none; }
 
         .char-card {
-            /* ★ 關鍵修改：增加卡片高度，讓圖片更大 */
-            height: 65vh; 
+            height: 70vh; 
             aspect-ratio: 9/16; 
             flex-shrink: 0;
-            border-radius: 12px;
+            border-radius: 16px; /* 更圓潤 */
             overflow: hidden;
             position: relative;
             scroll-snap-align: center;
             border: 1px solid #333;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
             background: #000;
+            transition: transform 0.3s;
         }
 
         .char-card img {
             width: 100%;
             height: 100%;
             object-fit: cover; 
-            filter: brightness(0.9); 
+            filter: brightness(0.85) contrast(1.1); 
+            transition: transform 0.5s;
         }
 
+        /* 選中時稍微放大 */
         .char-card:active {
             border-color: var(--accent-red);
             transform: scale(0.98);
@@ -266,52 +293,102 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            padding: 30px 10px 15px 10px;
-            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
+            padding: 40px 15px 20px 15px;
+            background: linear-gradient(to top, rgba(0,0,0,1), transparent);
             text-align: center;
+            pointer-events: none;
         }
 
         .char-name {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: bold;
             color: #fff;
             display: block;
             margin-bottom: 5px;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
         }
         
         .char-role {
             font-size: 0.85rem;
             color: var(--accent-gold);
+            letter-spacing: 1px;
         }
 
-        /* --- 輔助樣式 --- */
-        .hidden { display: none !important; }
+        /* 結局返回按鈕 */
+        #final-layer {
+            position: absolute;
+            bottom: 40px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            z-index: 50;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 1s ease 1s;
+        }
         
-        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        
-        .highlight-gold { color: var(--accent-gold); font-weight: bold;}
-        .highlight-red { color: var(--accent-red); font-weight: bold;}
-        .highlight-dim { color: #999; font-size: 0.9em; display: block; margin-top: 5px;}
+        .final-action-btn {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(5px);
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            padding: 18px 30px;
+            font-size: 1rem;
+            border-radius: 50px;
+            pointer-events: auto;
+            text-align: center;
+            justify-content: center;
+            width: 80%; 
+            letter-spacing: 0.1em;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            font-family: var(--font-main);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
 
+        .accent-btn {
+             background: rgba(197, 160, 0, 0.15);
+             border-width: 2px;
+             font-weight: bold;
+             color: #fff;
+             border-color: var(--accent-gold);
+        }
+
+        .final-action-btn:active {
+            transform: scale(0.95);
+            background: var(--accent-gold);
+            color: #000;
+        }
+
+        /* 輔助動畫 */
+        .hidden { display: none !important; }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
         .shake { animation: shake 0.5s; }
         @keyframes shake {
             0% { transform: translateX(0); } 25% { transform: translateX(-5px) rotate(-1deg); } 75% { transform: translateX(5px) rotate(1deg); } 100% { transform: translateX(0); }
         }
+
     </style>
 </head>
 <body>
 
 <div id="game-view">
     
+    <div class="animated-bg"></div>
+    <div class="noise-overlay"></div>
+
     <div id="bg-layer">
         <img id="current-bg" class="bg-img" src="" alt="">
     </div>
 
     <div id="ui-layer" class="hidden">
         <div class="text-scroll-box">
-            <div id="story-text" class="story-text"></div>
-            <div id="choices-box" class="choices-box"></div>
+            <div id="scene-content" class="animate-in">
+                <div id="story-text" class="story-text"></div>
+                <div id="choices-box" class="choices-box"></div>
+            </div>
         </div>
     </div>
 
@@ -324,6 +401,7 @@
         <div class="start-header">
             <h1>人皮刺繡</h1>
             <p>縫隙中的故事</p>
+            <div class="swipe-hint">← 左右滑動 →</div>
         </div>
         
         <div class="char-carousel">
@@ -354,11 +432,10 @@
 </div>
 
 <script>
-    // 遊戲數據庫
     const gameData = {
         // --- 林火路線 ---
         fire_intro: {
-            text: "你看著眼前的田野。雖然她們看起來像是女人——河明、以太、灰灰——但在你眼裡，那只是待割的<span class='highlight-gold'>野草</span>。\n\n你聽見樹對你說：「你要謙卑。」\n你笑著回答：「我不需要上帝，我就是上帝。」\n\n今天，你要如何處置這些野草？",
+            text: "你看著眼前的田野。雖然她們看起來像是女人——河明、以太、灰灰——但在你眼裡，那只是待割的<span style='color:#c5a000; font-weight:bold;'>野草</span>。\n\n你聽見樹對你說：「你要謙卑。」\n你笑著回答：「我不需要上帝，我就是上帝。」\n\n今天，你要如何處置這些野草？",
             choices: [
                 { text: "使用【照相機】。拍下她們，奪走靈魂。", target: "fire_camera" },
                 { text: "使用【鐮刀】。她們需要痛苦才能重生。", target: "fire_sickle" }
@@ -379,18 +456,18 @@
             ]
         },
         fire_sadism: {
-            text: "你沒有停下。你用言語和行為將她拆解。\n\n「愛的意思就是，我可以任意傷害你。」你心裡這樣想。\n\n但在夢裡，你看到她為你死去的樣子。那是最美的獻祭。\n\n<span class='highlight-gold'>你成功種植了你的上帝。</span>",
+            text: "你沒有停下。你用言語和行為將她拆解。\n\n「愛的意思就是，我可以任意傷害你。」你心裡這樣想。\n\n但在夢裡，你看到她為你死去的樣子。那是最美的獻祭。\n\n<span style='color:#c5a000; font-weight:bold;'>你成功種植了你的上帝。</span>",
             choices: [
                 { text: "重新開始", target: "start" }
             ]
         },
-        // ★ 結局節點：設定圖片路徑
+        // ★ 結局
         fire_end_success: {
-            text: "河明消失了，像空氣一樣淡。灰灰變胖了，然後被你拋棄。\n\n你坐在空蕩蕩的田野上，雖然孤獨，但你感到神聖。\n沒有任何關係是完全平等的，你是贏家。\n\n<span class='highlight-gold'>結局：荒原上的上帝</span>",
+            text: "河明消失了，像空氣一樣淡。灰灰變胖了，然後被你拋棄。\n\n你坐在空蕩蕩的田野上，雖然孤獨，但你感到神聖。\n沒有任何關係是完全平等的，你是贏家。\n\n<span style='color:#c5a000; font-weight:bold;'>結局：荒原上的上帝</span>",
             choices: [{ text: "凝視結局畫面", type: "visual_end", image: "fire1.jpg" }]
         },
         fire_end_fail: {
-            text: "那一瞬間的猶豫，讓你從神壇跌落。\n\n你意識到自己只是一個飢餓的普通男人。野草瘋長，將你淹沒。\n\n<span class='highlight-red'>結局：凡人的飢餓</span>",
+            text: "那一瞬間的猶豫，讓你從神壇跌落。\n\n你意識到自己只是一個飢餓的普通男人。野草瘋長，將你淹沒。\n\n<span style='color:#a80000; font-weight:bold;'>結局：凡人的飢餓</span>",
             choices: [{ text: "凝視結局畫面", type: "visual_end", image: "fire1.jpg" }]
         },
 
@@ -410,15 +487,15 @@
             ]
         },
         hui_escape: {
-            text: "你離開了那個房間。你拿出餐單，然後把它揉爛。\n\n你開始渴望脂肪。你的身體開始膨脹，像一層盔甲。身旁的座位是空的，沒人能擠壓你。\n\n<span class='highlight-gold'>結局：脂肪堡壘</span>",
+            text: "你離開了那個房間。你拿出餐單，然後把它揉爛。\n\n你開始渴望脂肪。你的身體開始膨脹，像一層盔甲。身旁的座位是空的，沒人能擠壓你。\n\n<span style='color:#c5a000; font-weight:bold;'>結局：脂肪堡壘</span>",
             choices: [{ text: "凝視結局畫面", type: "visual_end", image: "fire2.jpg" }]
         },
         hui_hide: {
-            text: "你拒絕張開嘴。林火的表情變了。\n\n那團灰霧開始令人窒息。你試圖躲進影子，但影子也是他的。你發現自己無處可逃。\n\n<span class='highlight-red'>結局：被霧吞噬</span>",
+            text: "你拒絕張開嘴。林火的表情變了。\n\n那團灰霧開始令人窒息。你試圖躲進影子，但影子也是他的。你發現自己無處可逃。\n\n<span style='color:#a80000; font-weight:bold;'>結局：被霧吞噬</span>",
             choices: [{ text: "凝視結局畫面", type: "visual_end", image: "fire2.jpg" }]
         },
         hui_bad_end: {
-            text: "你變得越來越瘦，越來越聽話。\n\n你只是一具被他擺弄的人偶。有一天，他厭倦了，把你扔在角落。\n\n<span class='highlight-red'>結局：人皮刺繡</span>",
+            text: "你變得越來越瘦，越來越聽話。\n\n你只是一具被他擺弄的人偶。有一天，他厭倦了，把你扔在角落。\n\n<span style='color:#a80000; font-weight:bold;'>結局：人皮刺繡</span>",
             choices: [{ text: "凝視結局畫面", type: "visual_end", image: "fire2.jpg" }]
         },
 
@@ -431,7 +508,7 @@
             ]
         },
         ether_pain: {
-            text: "他給你劇痛。你慘叫，但內心卻平靜了。\n\n「愛的意思就是，我可以任意傷害你。」他說。\n\n你在毀滅中確認存在。\n\n<span class='highlight-red'>結局：痛覺成癮者</span>",
+            text: "他給你劇痛。你慘叫，但內心卻平靜了。\n\n「愛的意思就是，我可以任意傷害你。」他說。\n\n你在毀滅中確認存在。\n\n<span style='color:#a80000; font-weight:bold;'>結局：痛覺成癮者</span>",
             choices: [{ text: "凝視結局畫面", type: "visual_end", image: "fire3.jpg" }]
         },
         ether_wood: {
@@ -442,11 +519,11 @@
             ]
         },
         ether_hollow_end: {
-            text: "你穿著白色的禮服，扮演著幸福的角色。\n\n木抱著的不是你，是那個角色。你在安全的房子裡，慢慢變成了一個幽靈。\n\n<span class='highlight-gold'>結局：衣櫃裡的幽靈</span>",
+            text: "你穿著白色的禮服，扮演著幸福的角色。\n\n木抱著的不是你，是那個角色。你在安全的房子裡，慢慢變成了一個幽靈。\n\n<span style='color:#c5a000; font-weight:bold;'>結局：衣櫃裡的幽靈</span>",
             choices: [{ text: "凝視結局畫面", type: "visual_end", image: "fire3.jpg" }]
         },
         ether_regret: {
-            text: "在深夜，你敲著實心的牆壁，聽不到回音。\n\n你想起了火的暴虐。你打開窗戶，看著下方。或許墜落的痛楚能讓你醒過來？\n\n<span class='highlight-red'>結局：未完成的墜落</span>",
+            text: "在深夜，你敲著實心的牆壁，聽不到回音。\n\n你想起了火的暴虐。你打開窗戶，看著下方。或許墜落的痛楚能讓你醒過來？\n\n<span style='color:#a80000; font-weight:bold;'>結局：未完成的墜落</span>",
             choices: [{ text: "凝視結局畫面", type: "visual_end", image: "fire3.jpg" }]
         }
     };
@@ -457,6 +534,7 @@
     const finalLayer = document.getElementById('final-layer');
     const storyTextEl = document.getElementById('story-text');
     const choicesBoxEl = document.getElementById('choices-box');
+    const sceneContent = document.getElementById('scene-content');
     const bgLayer = document.getElementById('bg-layer');
     const bgImgEl = document.getElementById('current-bg');
     const gameView = document.getElementById('game-view');
@@ -477,15 +555,19 @@
 
     // 觸發結局圖片顯示
     function showFinalVisual(imgSrc) {
-        // 1. 設定圖片
         bgImgEl.src = imgSrc;
         
-        // 2. 設定下載按鈕功能
+        // 設定下載功能
         downloadBtn.onclick = () => {
-            downloadImage(imgSrc);
+            const a = document.createElement('a');
+            a.href = imgSrc;
+            a.download = 'ending_card.jpg';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         };
 
-        // 3. 隱藏文字層，顯示圖片與按鈕層
+        // 轉場：UI層淡出，背景圖淡入
         uiLayer.style.opacity = 0;
         setTimeout(() => {
             uiLayer.classList.add('hidden');
@@ -496,25 +578,18 @@
         finalLayer.style.opacity = 1;
     }
 
-    // ★ 新增：下載圖片功能
-    function downloadImage(url) {
-        // 創建一個暫時的連結元素來觸發下載
-        const a = document.createElement('a');
-        a.href = url;
-        // 從路徑中提取檔名作為下載後的檔名
-        a.download = url.split('/').pop() || 'ending_image.jpg';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    }
-
     // 渲染場景
     function renderScene(sceneKey) {
         const scene = gameData[sceneKey];
 
-        // 預設狀態
+        // 預設隱藏結局層
         bgLayer.style.opacity = 0;
         finalLayer.style.opacity = 0;
+
+        // 重置文字動畫
+        sceneContent.classList.remove('animate-in');
+        void sceneContent.offsetWidth; // trigger reflow
+        sceneContent.classList.add('animate-in');
 
         // 更新文字
         storyTextEl.innerHTML = scene.text;
@@ -528,15 +603,18 @@
                 btn.innerHTML = choice.text;
                 
                 btn.onclick = () => {
-                    // 判斷是否為結局看圖按鈕
                     if (choice.type === "visual_end") {
                         showFinalVisual(choice.image);
                     } else {
-                        if (sceneKey === 'fire_sickle' || sceneKey === 'ether_intro') {
-                            gameView.classList.add('shake');
-                            setTimeout(() => gameView.classList.remove('shake'), 500);
+                        if (choice.target === 'start') {
+                            location.reload();
+                        } else {
+                            if (sceneKey === 'fire_sickle' || sceneKey === 'ether_intro') {
+                                gameView.classList.add('shake');
+                                setTimeout(() => gameView.classList.remove('shake'), 500);
+                            }
+                            renderScene(choice.target);
                         }
-                        renderScene(choice.target);
                     }
                 };
                 choicesBoxEl.appendChild(btn);
