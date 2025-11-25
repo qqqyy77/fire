@@ -139,17 +139,17 @@
             background: #080808;
             display: flex;
             flex-direction: column;
-            /* 修改：改為 center 讓整體垂直置中，並大幅減少上方 padding */
-            justify-content: center; 
-            padding-top: 2vh; 
-            padding-bottom: 2vh;
+            /* 修改 1: 改回 flex-start 讓整體靠上對齊，確保下方不被切掉 */
+            justify-content: flex-start;
+            /* 修改 2: 設定固定的上方留白，讓標題不會貼頂，移除下方留白 */
+            padding-top: 6vh; 
+            padding-bottom: 0;
         }
 
         .start-header {
             text-align: center;
             flex: 0 0 auto;
-            /* 修改：減少標題與卡片間的距離 */
-            margin-bottom: 1.5vh; 
+            margin-bottom: 1vh; 
             z-index: 30;
         }
 
@@ -176,8 +176,8 @@
 
         /* 卡片輪播容器 */
         .char-carousel {
-            /* 修改：flex: 1 改為 auto，避免它過度撐開空間，並增加 align-items: center */
-            flex: auto;
+            /* 修改 3: 移除 align-items: center (讓卡片靠上)，增加上方 margin 與標題拉開距離 */
+            flex: 1;
             display: flex;
             flex-direction: row;
             overflow-x: auto;
@@ -185,17 +185,15 @@
             -webkit-overflow-scrolling: touch;
             gap: 20px;
             padding: 0 40px;
-            /* 修改：讓卡片在容器內垂直置中 */
-            align-items: center;
+            margin-top: 2vh;
             scrollbar-width: none;
-            /* 修改：減少下方 padding */
-            padding-bottom: 10px; 
+            padding-bottom: 20px; /* 底部留一點空間給滑動 */
         }
         .char-carousel::-webkit-scrollbar { display: none; }
 
         .char-card {
-            /* 修改：關鍵！將高度從 80vh 降到約 65vh，以適應螢幕 */
-            height: 65vh; 
+            /* 修改 4: 再次減小卡片高度至 60vh，確保在大多數螢幕都能完整顯示 */
+            height: 60vh; 
             aspect-ratio: 9/16; 
             flex-shrink: 0;
             border-radius: 12px;
@@ -228,7 +226,6 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            /* 修改：稍微減少卡片內部文字區塊的 padding，讓它更緊湊 */
             padding: 30px 15px 20px 15px;
             background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
             text-align: center;
