@@ -10,8 +10,10 @@
             --accent-red: #a80000;
             --accent-gold: #c5a000;
             --text-color: #e0e0e0;
-            /* 讓文字背景稍微深一點，確保閱讀清晰 */
-            --overlay-bg: rgba(10, 10, 10, 0.92);
+            /* 劇情模式的背景色 (無圖時) */
+            --scene-bg-color: #111;
+            /* 文字框背景 */
+            --overlay-bg: rgba(15, 15, 15, 0.95);
         }
 
         * {
@@ -27,18 +29,19 @@
             color: var(--text-color);
             height: 100vh;
             width: 100vw;
-            overflow: hidden; /* 鎖定 body，滾動交給內部容器 */
-            position: fixed; /* 防止 iOS 橡皮筋效果 */
+            overflow: hidden;
+            position: fixed;
         }
 
         #game-view {
             width: 100%;
             height: 100%;
             position: relative;
-            background: #111;
+            background: var(--scene-bg-color);
+            transition: background 0.5s;
         }
 
-        /* --- 背景圖片層 (靜態) --- */
+        /* --- 背景圖片層 (只在結局顯示) --- */
         #bg-layer {
             position: absolute;
             top: 0;
@@ -46,21 +49,20 @@
             width: 100%;
             height: 100%;
             z-index: 0;
+            opacity: 0; /* 預設隱藏 */
+            transition: opacity 1s ease;
         }
 
         .bg-img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* 背景圖依然填滿，保持氛圍 */
+            object-fit: cover;
             object-position: center;
-            filter: brightness(0.5); /* 壓暗背景，讓前方文字清楚 */
-            position: absolute;
-            top: 0;
-            left: 0;
-            transition: opacity 0.5s ease;
+            /* 結局時圖片稍微壓暗一點點，以免字看不清，但保留色彩 */
+            filter: brightness(0.6); 
         }
 
-        /* --- UI層：包含可滾動的文字區 --- */
+        /* --- UI層：文字與選項 --- */
         #ui-layer {
             position: absolute;
             top: 0;
@@ -70,36 +72,31 @@
             z-index: 10;
             display: flex;
             flex-direction: column;
-            justify-content: flex-end; /* 讓內容靠底部對齊 */
-            pointer-events: none; /* 讓點擊穿透到背景，除了文字區 */
+            justify-content: flex-end; /* 內容靠下 */
+            pointer-events: none;
         }
 
-        /* ★ 關鍵修復：滾動容器 */
+        /* 滾動容器 */
         .text-scroll-box {
-            pointer-events: auto; /* 恢復交互 */
+            pointer-events: auto;
             width: 100%;
-            /* 限制高度：留出上方 30% 給背景圖，下方 70% 給文字 */
-            max-height: 75vh; 
+            /* 在無圖模式下，讓文字區佔據更多空間，但保留上方留白 */
+            max-height: 85vh; 
             background: var(--overlay-bg);
             border-top-left-radius: 20px;
             border-top-right-radius: 20px;
-            
-            /* ★ 關鍵：內滾動設定 */
             overflow-y: auto; 
             -webkit-overflow-scrolling: touch;
-            
-            /* ★ 關鍵：增加底部留白，防止選項被手機導航列擋住 */
-            padding: 40px 30px 120px 30px; 
-            
+            padding: 50px 30px 100px 30px; /* 底部加厚，防擋 */
             animation: slideUp 0.4s ease-out;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.8);
+            box-shadow: 0 -5px 30px rgba(0,0,0,1);
         }
 
         .story-text {
             font-size: 1.15rem;
-            line-height: 1.8;
-            color: #fff;
-            margin-bottom: 30px;
+            line-height: 1.9;
+            color: #ddd;
+            margin-bottom: 40px;
             white-space: pre-wrap;
         }
 
@@ -111,8 +108,8 @@
         }
 
         button {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: #fff;
             padding: 20px;
             font-size: 1rem;
@@ -121,7 +118,6 @@
             border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s;
-            /* 確保按鈕夠大，好點擊 */
             min-height: 60px; 
             display: flex;
             align-items: center;
@@ -133,74 +129,81 @@
             transform: scale(0.98);
         }
 
-        /* --- 開始畫面 (左右滑動輪播) --- */
+        /* --- 開始畫面 (調整版) --- */
         #start-screen {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 100%;
+            height: 100%; /* 確保佔滿一頁 */
             z-index: 20;
-            background: #050505;
+            background: #080808;
             display: flex;
             flex-direction: column;
-            justify-content: center; /* 垂直居中 */
+            /* 讓內容盡量靠上，騰出底部空間給圖片 */
+            justify-content: flex-start; 
+            padding-top: 40px; 
         }
 
         .start-header {
             text-align: center;
-            margin-bottom: 10px;
-            height: 10vh; /* 標題佔據上方空間 */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
+            /* 縮減標題佔用的高度 */
+            flex: 0 0 auto; 
+            margin-bottom: 20px;
+            z-index: 30;
         }
 
         .start-header h1 {
             font-weight: normal;
             letter-spacing: 0.3em;
-            margin: 0;
-            font-size: 1.5rem;
+            margin: 0 0 5px 0;
+            font-size: 1.6rem;
             color: #fff;
+        }
+
+        .start-header p {
+            font-size: 0.9rem;
+            color: #888;
+            margin: 0;
         }
 
         .swipe-hint {
             font-size: 0.8rem;
-            color: #666;
+            color: var(--accent-gold);
             margin-top: 5px;
+            opacity: 0.7;
         }
 
         /* 卡片輪播容器 */
         .char-carousel {
+            /* 讓輪播區佔據剩餘所有空間 */
+            flex: 1; 
             display: flex;
             flex-direction: row;
             overflow-x: auto;
-            scroll-snap-type: x mandatory; /* 滾動自動對齊 */
+            scroll-snap-type: x mandatory;
             -webkit-overflow-scrolling: touch;
             gap: 20px;
-            padding: 0 40px; /* 兩側留白，讓第一張和最後一張能置中 */
-            
-            /* ★ 關鍵：固定高度區域，讓卡片可以撐滿 */
-            height: 70vh; 
-            align-items: center;
+            padding: 0 40px; 
+            align-items: flex-start; /* 靠上對齊 */
             
             /* 隱藏滾動條 */
             scrollbar-width: none; 
+            
+            /* 底部留白，避免貼底 */
+            padding-bottom: 40px; 
         }
         .char-carousel::-webkit-scrollbar { display: none; }
 
-        /* ★ 關鍵修復：卡片樣式 */
         .char-card {
-            /* 強制高度 */
-            height: 100%; 
-            /* ★ 核心：強制 9:16 比例，寬度會自動計算 */
+            /* ★ 關鍵：高度設為容器的 90%，避免超出畫面 */
+            height: 90%; 
             aspect-ratio: 9/16; 
-            
-            flex-shrink: 0; /* 禁止被擠壓 */
+            flex-shrink: 0;
             border-radius: 12px;
             overflow: hidden;
             position: relative;
-            scroll-snap-align: center; /* 對齊螢幕中央 */
+            scroll-snap-align: center;
             border: 1px solid #333;
             box-shadow: 0 5px 20px rgba(0,0,0,0.5);
             background: #000;
@@ -209,14 +212,15 @@
         .char-card img {
             width: 100%;
             height: 100%;
-            /* ★ 核心：確保圖片填滿卡片且不變形（因為卡片已經是 9:16，所以這裡用 cover 也不會裁切） */
             object-fit: cover; 
-            filter: grayscale(100%) brightness(0.6);
-            transition: filter 0.3s;
+            /* ★ 修改：彩色顯示，稍微調亮 */
+            filter: brightness(0.9); 
+            transition: transform 0.3s;
         }
 
         .char-card:active img {
-            filter: grayscale(0%) brightness(1);
+            transform: scale(1.05);
+            filter: brightness(1.1);
         }
         .char-card:active {
             border-color: var(--accent-red);
@@ -227,34 +231,35 @@
             bottom: 0;
             left: 0;
             width: 100%;
-            padding: 20px 10px;
-            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
+            padding: 30px 15px;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
             text-align: center;
             pointer-events: none;
         }
 
         .char-name {
-            font-size: 1.4rem;
+            font-size: 1.5rem;
             font-weight: bold;
             color: #fff;
             display: block;
             margin-bottom: 5px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.8);
         }
         
         .char-role {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: var(--accent-gold);
+            text-shadow: 0 1px 3px rgba(0,0,0,1);
         }
 
         /* --- 輔助樣式 --- */
         .hidden { display: none !important; }
         
-        @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         
         .highlight-gold { color: var(--accent-gold); font-weight: bold;}
         .highlight-red { color: var(--accent-red); font-weight: bold;}
 
-        /* 震動效果 */
         .shake { animation: shake 0.5s; }
         @keyframes shake {
             0% { transform: translateX(0); } 25% { transform: translateX(-5px) rotate(-1deg); } 75% { transform: translateX(5px) rotate(1deg); } 100% { transform: translateX(0); }
@@ -279,7 +284,8 @@
     <div id="start-screen">
         <div class="start-header">
             <h1>人皮刺繡</h1>
-            <div class="swipe-hint">← 左右滑動選擇 →</div>
+            <p>點擊卡片進入皮膚</p>
+            <div class="swipe-hint">← 左右滑動 →</div>
         </div>
         
         <div class="char-carousel">
@@ -313,7 +319,7 @@
     const gameData = {
         // --- 林火路線 ---
         fire_intro: {
-            image: "fire1.jpg",
+            // 沒有 image 屬性 -> 不顯示圖片
             text: "你看著眼前的田野。雖然她們看起來像是女人——河明、以太、灰灰——但在你眼裡，那只是待割的<span class='highlight-gold'>野草</span>。\n\n你聽見樹對你說：「你要謙卑。」\n你笑著回答：「我不需要上帝，我就是上帝。」\n\n今天，你要如何處置這些野草？",
             choices: [
                 { text: "使用【照相機】。拍下她們，奪走靈魂。", target: "fire_camera" },
@@ -321,7 +327,6 @@
             ]
         },
         fire_camera: {
-            image: "fire1.jpg",
             text: "你舉起相機。對焦。\n\n灰灰在鏡頭裡無所遁形。照片背後寫著：「想你的時刻。」\n\n這不是愛，這是狩獵。河明看見照片後，交出了她所有的積蓄。\n\n你看著存摺上的數字，這是一種收割。",
             choices: [
                 { text: "繼續索取，直到她變成空氣。", target: "fire_end_success" },
@@ -329,7 +334,6 @@
             ]
         },
         fire_sickle: {
-            image: "fire1.jpg",
             text: "你走進野草之間。草割破了你的手背，流出血來。\n\n你嗅到了血的氣味。以太正在床上等你，像一頭受傷的獸。\n\n你手裡拿著工具。她需要殘忍，你很清楚。",
             choices: [
                 { text: "給予她毀滅性的痛，這是她要的安全感。", target: "fire_sadism" },
@@ -337,17 +341,18 @@
             ]
         },
         fire_sadism: {
-            image: "fire1.jpg",
             text: "你沒有停下。你用言語和行為將她拆解。\n\n「愛的意思就是，我可以任意傷害你。」你心裡這樣想。\n\n但在夢裡，你看到她為你死去的樣子。那是最美的獻祭。\n\n<span class='highlight-gold'>你成功種植了你的上帝。</span>",
             choices: [
                 { text: "重新開始", target: "start" }
             ]
         },
+        // ★ 結局：顯示滿版圖片
         fire_end_success: {
-            image: "fire1.jpg",
+            image: "fire1.jpg", 
             text: "河明消失了，像空氣一樣淡。灰灰變胖了，然後被你拋棄。\n\n你坐在空蕩蕩的田野上，雖然孤獨，但你感到神聖。\n沒有任何關係是完全平等的，你是贏家。\n\n<span class='highlight-gold'>結局：荒原上的上帝</span>",
             choices: [{ text: "返回", target: "start" }]
         },
+        // ★ 結局：顯示滿版圖片
         fire_end_fail: {
             image: "fire1.jpg",
             text: "那一瞬間的猶豫，讓你從神壇跌落。\n\n你意識到自己只是一個飢餓的普通男人。野草瘋長，將你淹沒。\n\n<span class='highlight-red'>結局：凡人的飢餓</span>",
@@ -356,7 +361,6 @@
 
         // --- 灰灰路線 ---
         hui_intro: {
-            image: "fire2.jpg",
             text: "天氣太熱了。你蹲在地上，試圖把自己縮進最深最黑的影子裡。\n\n林火端來了食物，那是你最討厭的濃湯。\n\n他盯著你。「吃下去，」他的眼神說，「這也是愛。」\n\n你的胃在翻騰。",
             choices: [
                 { text: "【進食】 順從他，讓他滿意。", target: "hui_eat" },
@@ -364,23 +368,25 @@
             ]
         },
         hui_eat: {
-            image: "fire2.jpg",
             text: "你張開嘴。食物滑進喉嚨，像石頭一樣沉重。\n\n他在微笑。那是捕食者的微笑。\n\n你看著鏡子，你變瘦了，這很不合理。你正在被他「吃掉」。",
             choices: [
                 { text: "繼續這樣下去，直到消失。", target: "hui_bad_end" },
                 { text: "離開他，用「暴食」奪回控制權。", target: "hui_escape" }
             ]
         },
+        // ★ 結局
         hui_escape: {
             image: "fire2.jpg",
             text: "你離開了那個房間。你拿出餐單，然後把它揉爛。\n\n你開始渴望脂肪。你的身體開始膨脹，像一層盔甲。身旁的座位是空的，沒人能擠壓你。\n\n<span class='highlight-gold'>結局：脂肪堡壘</span>",
             choices: [{ text: "返回", target: "start" }]
         },
+        // ★ 結局
         hui_hide: {
             image: "fire2.jpg",
             text: "你拒絕張開嘴。林火的表情變了。\n\n那團灰霧開始令人窒息。你試圖躲進影子，但影子也是他的。你發現自己無處可逃。\n\n<span class='highlight-red'>結局：被霧吞噬</span>",
             choices: [{ text: "返回", target: "start" }]
         },
+        // ★ 結局
         hui_bad_end: {
             image: "fire2.jpg",
             text: "你變得越來越瘦，越來越聽話。\n\n你只是一具被他擺弄的人偶。有一天，他厭倦了，把你扔在角落。\n\n<span class='highlight-red'>結局：人皮刺繡</span>",
@@ -389,7 +395,6 @@
 
         // --- 以太路線 ---
         ether_intro: {
-            image: "fire3.jpg",
             text: "從小，你就試圖保持腹部的空洞。\n但現在，那種虛無讓你恐懼。\n\n阿火拿著工具站在你面前。他的眼神是唯一的熱源。\n\n「你知道你對我做了什麼嗎？」你問。",
             choices: [
                 { text: "因為恐懼而順從，渴望他的殘忍。", target: "ether_pain" },
@@ -397,23 +402,25 @@
             ]
         },
         ether_pain: {
+            // ★ 結局
             image: "fire3.jpg",
             text: "他給你劇痛。你慘叫，但內心卻平靜了。\n\n「愛的意思就是，我可以任意傷害你。」他說。\n\n你在毀滅中確認存在。\n\n<span class='highlight-red'>結局：痛覺成癮者</span>",
             choices: [{ text: "返回", target: "start" }]
         },
         ether_wood: {
-            image: "fire3.jpg",
             text: "你離開了火，遇到了木。\n\n木是安全的。他給你買了房子，全是「實」的牆壁。\n\n在一場遊戲中，木擁抱你。所有人都在歡呼，但你卻感到前所未有的寂寞。",
             choices: [
                 { text: "接受這份虛假的安全。", target: "ether_hollow_end" },
                 { text: "懷念火帶來的毀滅。", target: "ether_regret" }
             ]
         },
+        // ★ 結局
         ether_hollow_end: {
             image: "fire3.jpg",
             text: "你穿著白色的禮服，扮演著幸福的角色。\n\n木抱著的不是你，是那個角色。你在安全的房子裡，慢慢變成了一個幽靈。\n\n<span class='highlight-gold'>結局：衣櫃裡的幽靈</span>",
             choices: [{ text: "返回", target: "start" }]
         },
+        // ★ 結局
         ether_regret: {
             image: "fire3.jpg",
             text: "在深夜，你敲著實心的牆壁，聽不到回音。\n\n你想起了火的暴虐。你打開窗戶，看著下方。或許墜落的痛楚能讓你醒過來？\n\n<span class='highlight-red'>結局：未完成的墜落</span>",
@@ -426,17 +433,15 @@
     const uiLayer = document.getElementById('ui-layer');
     const storyTextEl = document.getElementById('story-text');
     const choicesBoxEl = document.getElementById('choices-box');
+    const bgLayer = document.getElementById('bg-layer');
     const bgImgEl = document.getElementById('current-bg');
     const gameView = document.getElementById('game-view');
     const textScrollBox = document.querySelector('.text-scroll-box');
 
     // 開始遊戲
     function startGame(startSceneKey) {
-        // 隱藏開始畫面
         startScreen.classList.add('hidden');
         uiLayer.classList.remove('hidden');
-        
-        // 渲染第一幕
         renderScene(startSceneKey);
     }
 
@@ -444,25 +449,25 @@
     function renderScene(sceneKey) {
         if (sceneKey === 'start') {
             uiLayer.classList.add('hidden');
+            bgLayer.style.opacity = 0; // 隱藏結局圖
             startScreen.classList.remove('hidden');
             return;
         }
 
         const scene = gameData[sceneKey];
 
-        // 1. 切換圖片
-        if (scene.image && bgImgEl.src !== scene.image) {
-            bgImgEl.style.opacity = 0; 
-            setTimeout(() => {
-                bgImgEl.src = scene.image;
-                bgImgEl.style.opacity = 1; 
-            }, 200);
+        // 1. 圖片顯示邏輯 (只在結局顯示)
+        if (scene.image) {
+            bgImgEl.src = scene.image;
+            bgLayer.style.opacity = 1; // 顯示滿版圖
+        } else {
+            bgLayer.style.opacity = 0; // 一般劇情隱藏圖片
         }
 
         // 2. 更新文字
         storyTextEl.innerHTML = scene.text;
         
-        // ★ 關鍵：每次切換場景時，文字區滾動回頂部
+        // 重置滾動
         textScrollBox.scrollTop = 0;
 
         // 3. 生成選項
@@ -472,7 +477,6 @@
                 const btn = document.createElement('button');
                 btn.textContent = choice.text;
                 btn.onclick = () => {
-                    // 震動回饋
                     if (sceneKey === 'fire_sickle' || sceneKey === 'ether_intro') {
                         gameView.classList.add('shake');
                         setTimeout(() => gameView.classList.remove('shake'), 500);
